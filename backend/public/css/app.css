@@ -1,0 +1,194 @@
+/* Masjid App — single stylesheet, no build step required. */
+:root {
+    --bg: #f6f7f4;
+    --surface: #ffffff;
+    --surface-2: #eef2ec;
+    --text: #1d2420;
+    --muted: #5f6b63;
+    --border: #dfe4dd;
+    --primary: #0f6b4f;
+    --primary-ink: #ffffff;
+    --primary-soft: #e3f1ea;
+    --accent: #b8862b;
+    --danger: #b3261e;
+    --danger-soft: #fbe9e7;
+    --warn-soft: #fff4dc;
+    --radius: 12px;
+    --shadow: 0 1px 2px rgba(16, 24, 20, .06), 0 4px 16px rgba(16, 24, 20, .04);
+    color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #111614;
+        --surface: #181f1c;
+        --surface-2: #1f2824;
+        --text: #e6ece8;
+        --muted: #9aa8a0;
+        --border: #2b3631;
+        --primary: #3fb488;
+        --primary-ink: #0b1310;
+        --primary-soft: #183229;
+        --accent: #e0b25a;
+        --danger: #f2827a;
+        --danger-soft: #3a1d1b;
+        --warn-soft: #3a3020;
+        --shadow: none;
+        color-scheme: dark;
+    }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+}
+a { color: var(--primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+h1, h2, h3 { line-height: 1.25; margin: 0 0 .5rem; }
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.2rem; }
+h3 { font-size: 1rem; }
+p { margin: 0 0 .75rem; }
+small, .muted { color: var(--muted); }
+.num { font-variant-numeric: tabular-nums; }
+.right { text-align: right; }
+
+/* Layout */
+.container { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+.topbar {
+    background: var(--primary);
+    color: var(--primary-ink);
+}
+.topbar .container { display: flex; align-items: center; gap: 1rem; min-height: 56px; flex-wrap: wrap; }
+.brand { font-weight: 700; color: inherit; font-size: 1.05rem; }
+.brand:hover { text-decoration: none; }
+.nav { display: flex; gap: .25rem; flex-wrap: wrap; margin-left: auto; }
+.nav a, .nav button {
+    color: inherit; opacity: .85; padding: .4rem .7rem; border-radius: 8px;
+    background: none; border: 0; font: inherit; cursor: pointer;
+}
+.nav a:hover, .nav button:hover { opacity: 1; background: rgba(255,255,255,.12); text-decoration: none; }
+.nav a.active { opacity: 1; background: rgba(255,255,255,.18); }
+main { padding: 24px 0 48px; }
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.page-head h1 { margin: 0; }
+footer { color: var(--muted); font-size: .85rem; padding: 24px 0; border-top: 1px solid var(--border); }
+
+.grid { display: grid; gap: 16px; }
+.grid-2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.grid-3 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.grid-4 { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    box-shadow: var(--shadow);
+    min-width: 0;
+}
+.card > h2:first-child, .card > h3:first-child { margin-top: 0; }
+.stat .label { color: var(--muted); font-size: .85rem; }
+.stat .value { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* Prayer board */
+.hero {
+    background: linear-gradient(135deg, var(--primary), #0b4f3a);
+    color: #fff; border-radius: var(--radius); padding: 22px; margin-bottom: 16px;
+}
+.hero .muted { color: rgba(255,255,255,.75); }
+.hero h1 { color: #fff; }
+.next-prayer { font-size: 2rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.prayers { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+.prayer {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px; text-align: center;
+}
+.prayer.is-next { border-color: var(--primary); background: var(--primary-soft); }
+.prayer .name { font-weight: 600; }
+.prayer .adhan { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.prayer .iqamah { color: var(--muted); font-size: .9rem; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { padding: 9px 12px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+th { font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); background: var(--surface-2); }
+tbody tr:last-child td { border-bottom: 0; }
+tr.highlight td { background: var(--primary-soft); }
+tr.is-friday td:first-child { font-weight: 600; }
+tr.voided td { color: var(--muted); text-decoration: line-through; }
+td.wrap { white-space: normal; min-width: 200px; }
+
+/* Forms */
+form.inline { display: inline; }
+.form-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field.full { grid-column: 1 / -1; }
+label { font-weight: 600; font-size: .9rem; }
+.check { display: flex; gap: .5rem; align-items: center; font-weight: 500; }
+input, select, textarea {
+    font: inherit; color: var(--text); background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; padding: .5rem .65rem; width: 100%;
+}
+input[type=checkbox] { width: auto; }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+.error { color: var(--danger); font-size: .85rem; }
+.filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 12px; }
+.filters .field { min-width: 140px; flex: 1; }
+
+.btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+    padding: .5rem .9rem; border-radius: 8px; border: 1px solid transparent;
+    background: var(--primary); color: var(--primary-ink); font: inherit; font-weight: 600; cursor: pointer;
+    text-decoration: none; white-space: nowrap;
+}
+.btn:hover { filter: brightness(1.05); text-decoration: none; }
+.btn.secondary { background: var(--surface); color: var(--text); border-color: var(--border); }
+.btn.danger { background: var(--danger); color: #fff; }
+.btn.small { padding: .25rem .55rem; font-size: .85rem; }
+.actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* Feedback */
+.alert { padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; border: 1px solid var(--border); }
+.alert.success { background: var(--primary-soft); border-color: transparent; }
+.alert.error { background: var(--danger-soft); color: var(--text); border-color: transparent; }
+.alert.warn { background: var(--warn-soft); border-color: transparent; }
+.badge {
+    display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: .75rem; font-weight: 600;
+    background: var(--surface-2); color: var(--muted);
+}
+.badge.completed, .badge.posted, .badge.income, .badge.confirmed { background: var(--primary-soft); color: var(--primary); }
+.badge.pending, .badge.estimated { background: var(--warn-soft); color: var(--accent); }
+.badge.refunded, .badge.voided, .badge.cancelled, .badge.expense { background: var(--danger-soft); color: var(--danger); }
+
+.bar { height: 8px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.bar > span { display: block; height: 100%; background: var(--primary); }
+
+details summary { cursor: pointer; color: var(--primary); }
+.pagination { display: flex; gap: 6px; list-style: none; padding: 0; margin: 12px 0 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); }
+
+/* Printable receipt */
+.receipt { max-width: 560px; margin: 0 auto; }
+.receipt dl { display: grid; grid-template-columns: 160px 1fr; gap: 6px 12px; margin: 0; }
+.receipt dt { color: var(--muted); }
+.receipt dd { margin: 0; font-weight: 600; }
+
+@media print {
+    .topbar, footer, .no-print { display: none !important; }
+    body { background: #fff; color: #000; }
+    .card { border: 0; box-shadow: none; }
+}
+
+@media (max-width: 600px) {
+    h1 { font-size: 1.35rem; }
+    .next-prayer { font-size: 1.6rem; }
+    .receipt dl { grid-template-columns: 1fr; }
+}
+.pagination .page-item.active .page-link { background: var(--primary); color: var(--primary-ink); border-color: var(--primary); }
+.pagination .page-item.disabled .page-link { color: var(--muted); }

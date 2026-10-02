@@ -1,0 +1,166 @@
+@extends('layouts.admin')
+
+@section('title', 'Dashboard')
+
+@use('App\Enums\Role')
+@use('App\Services\Finance\Money')
+@php
+    $role = auth()->user()->role;
+    $has = fn (string $panel) => in_array($panel, $panels, true);
+@endphp
+
+@section('content')
+    <div class="page-head">
+        <div>
+            <h1>Assalamu alaikum, {{ auth()->user()->name }}</h1>
+            <span class="muted">{{ $today->format('l j F Y') }} &middot; {{ $hijri->format() }}
+                &middot; <span class="badge {{ $role === Role::Admin ? 'confirmed' : 'pending' }}">{{ $role->label() }}</span></span>
+        </div>
+        <div class="actions">
+            <a class="btn" href="{{ route('admin.donations.create') }}">Record donation</a>
+            <a class="btn secondary" href="{{ route('admin.transactions.create', ['type' => 'expense']) }}">Record expense</a>
+        </div>
+    </div>
+
+    @if ($has(Role::PANEL_SUMMARY))
+        @php($cur = $summary['currency'])
+        <div class="grid grid-4" style="margin-bottom:16px">
+            <div class="card stat"><div class="label">Income this month</div><div class="value">{{ Money::format($summary['income'], $cur) }}</div></div>
+            <div class="card stat"><div class="label">Expenses this month</div><div class="value">{{ Money::format($summary['expense'], $cur) }}</div></div>
+            <div class="card stat"><div class="label">Net</div><div class="value">{{ Money::format($summary['net'], $cur) }}</div></div>
+            <div class="card stat"><div class="label">Donations ({{ $summary['donations']['count'] }})</div><div class="value">{{ Money::format($summary['donations']['total'], $cur) }}</div></div>
+        </div>
+    @endif
+
+    @if ($has(Role::PANEL_PENDING))
+        <div class="card" style="margin-bottom:16px">
+            <div class="page-head" style="margin-bottom:8px">
+                <h2 style="margin:0">Pledges waiting for payment ({{ $pendingCount }})</h2>
+                @if ($pendingCount > $pendingDonations->count())
+                    <a href="{{ route('admin.donations.index', ['status' => 'pending']) }}">View all</a>
+                @endif
+            </div>
+            @if ($pendingDonations->isEmpty())
+                <p class="muted" style="margin:0">No pledges waiting. New pledges from the website and app appear here.</p>
+            @else
+                @include('admin.donations._table', ['donations' => $pendingDonations])
+            @endif
+        </div>
+    @endif
+
+    <div class="grid grid-2">
+        @if ($has(Role::PANEL_FUNDS))
+            <div class="card">
+                <h2>Fund balances</h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Fund</th><th class="right">Balance</th><th>Target</th></tr></thead>
+                        <tbody>
+                        @foreach ($summary['funds'] as $f)
+                            <tr>
+                                <td>{{ $f['name'] }} @if($f['is_restricted'])<span class="badge">restricted</span>@endif</td>
+                                <td class="right">{{ number_format($f['balance'], 2) }}</td>
+                                <td style="min-width:120px">
+                                    @if ($f['target_amount'] > 0)
+                                        <div class="bar"><span style="width:{{ min(100, max(0, $f['balance'] / $f['target_amount'] * 100)) }}%"></span></div>
+                                        <small>{{ number_format($f['target_amount'], 0) }}</small>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
+
+        @if ($has(Role::PANEL_EXPENSES))
+            <div class="card">
+                <div class="page-head" style="margin-bottom:8px">
+                    <h2 style="margin:0">Latest expenses</h2>
+                    <a href="{{ route('admin.transactions.index', ['type' => 'expense']) }}">Ledger</a>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Date</th><th>Category</th><th>Fund</th><th class="right">Amount</th></tr></thead>
+                        <tbody>
+                        @forelse ($recentExpenses as $t)
+                            <tr title="{{ $t->description }}">
+                                <td>{{ $t->transacted_on->format('j M') }}</td>
+                                <td>{{ $t->category->name }}</td>
+                                <td>{{ $t->fund?->name ?? '—' }}</td>
+                                <td class="right">{{ number_format($t->amount, 2) }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="4" class="muted">No expenses recorded yet.</td></tr>
+                        @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
+
+        @if ($has(Role::PANEL_PRAYERS))
+            <div class="card">
+                <div class="page-head" style="margin-bottom:8px">
+                    <h2 style="margin:0">Today's prayers</h2>
+                    <a href="{{ route('admin.settings.edit') }}">Iqamah settings</a>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Prayer</th><th>Adhan</th><th>Iqamah</th></tr></thead>
+                        <tbody>
+                        @foreach (\App\Enums\Prayer::cases() as $p)
+                            <tr><td>{{ $p->label() }}</td><td>{{ $schedule->times[$p->value]?->format('H:i') }}</td><td>{{ $schedule->iqamah[$p->value]?->format('H:i') ?? '—' }}</td></tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
+
+        @if ($has(Role::PANEL_RAMADAN))
+            <div class="card">
+                <div class="page-head" style="margin-bottom:8px">
+                    <h2 style="margin:0">Ramadan {{ $ramadan->hijri_year }}</h2>
+                    <span class="badge {{ $ramadan->is_confirmed ? 'confirmed' : 'estimated' }}">{{ $ramadan->is_confirmed ? 'confirmed' : 'estimated' }}</span>
+                </div>
+                <p>Starts <strong>{{ $ramadan->starts_on->format('l j F Y') }}</strong> &middot; {{ $ramadan->total_days }} days
+                    @if ($ramadan->taraweeh_time) &middot; Taraweeh {{ substr($ramadan->taraweeh_time, 0, 5) }} @endif</p>
+                @unless ($ramadan->is_confirmed)
+                    <p class="muted">Confirm the start date after the moon sighting so the community sees the right timetable.</p>
+                @endunless
+                <a class="btn secondary" href="{{ route('admin.ramadan.edit', $ramadan->hijri_year) }}">Manage Ramadan</a>
+            </div>
+        @endif
+
+        @if ($has(Role::PANEL_STAFF))
+            <div class="card">
+                <div class="page-head" style="margin-bottom:8px">
+                    <h2 style="margin:0">Staff</h2>
+                    <a href="{{ route('admin.users.index') }}">Manage</a>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead>
+                        <tbody>
+                        @foreach ($staff as $u)
+                            <tr><td>{{ $u->name }}</td><td>{{ $u->email }}</td><td><span class="badge">{{ $u->role->label() }}</span></td></tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
+    </div>
+
+    @if ($has(Role::PANEL_DONATIONS))
+        <div class="card" style="margin-top:16px">
+            <div class="page-head" style="margin-bottom:8px">
+                <h2 style="margin:0">Latest donations</h2>
+                <a href="{{ route('admin.donations.index') }}">All donations</a>
+            </div>
+            @include('admin.donations._table', ['donations' => $recentDonations])
+        </div>
+    @endif
+@endsection
