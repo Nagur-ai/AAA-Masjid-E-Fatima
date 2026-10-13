@@ -75,7 +75,7 @@ class PrayerAndRamadanApiTest extends TestCase
             ->assertJsonPath('data.days.0.weekday_te', 'బుధవారం')
             ->assertJsonPath('data.duas.0.key', 'sehri')
             ->assertJsonPath('data.duas.1.key', 'iftar')
-            ->assertJsonPath('data.duas.1.telugu', 'అల్లాహుమ్మ లక సుమ్తు వ అలా రిజ్ఖిక అఫ్తర్తు');
+            ->assertJsonPath('data.duas.1.telugu', 'అల్లాహుమ్మ లక సుమ్తు వ బిక ఆమన్తు వ అలైక తవక్కల్తు వ అలా రిజ్ఖిక అఫ్తర్తు ఫతఖబ్బల్ మిన్నీ');
     }
 
     public function test_admin_confirms_moon_sighted_start(): void
