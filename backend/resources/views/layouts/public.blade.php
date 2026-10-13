@@ -35,6 +35,7 @@
                 <a href="{{ route('login') }}" @class(['active' => request()->routeIs('login')])>Sign in</a>
             @endauth
         </nav>
+        @include('partials.clock', ['clockMasjid' => $masjid ?? null])
     </div>
 </header>
 <main>

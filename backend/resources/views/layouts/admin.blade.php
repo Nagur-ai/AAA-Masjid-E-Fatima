@@ -29,6 +29,7 @@
                 <button type="submit">Sign out</button>
             </form>
         </nav>
+        @include('partials.clock', ['clockMasjid' => $currentMasjid])
     </div>
 </header>
 <main>

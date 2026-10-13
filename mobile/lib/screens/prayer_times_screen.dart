@@ -8,6 +8,17 @@ import '../models.dart';
 import 'common.dart';
 import 'masjid_picker_screen.dart';
 
+const _fard = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+
+/// The next prayer as seen on the masjid's clock right now.
+class _Upcoming {
+  const _Upcoming(this.prayer, this.time, this.remaining);
+
+  final String prayer;
+  final String time;
+  final Duration remaining;
+}
+
 class PrayerTimesScreen extends StatefulWidget {
   const PrayerTimesScreen({super.key});
 
@@ -18,13 +29,16 @@ class PrayerTimesScreen extends StatefulWidget {
 class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   Future<(Masjid, TodayResponse)>? _future;
   Timer? _ticker;
+  DateTime? _lastReload;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _future ??= _load();
-    // Refresh the countdown every 30 seconds.
-    _ticker ??= Timer.periodic(const Duration(seconds: 30), (_) => setState(() {}));
+    // Tick every second so the clock and countdown stay current.
+    _ticker ??= Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
@@ -34,12 +48,34 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   }
 
   Future<(Masjid, TodayResponse)> _load() async {
+    _lastReload = DateTime.now();
     final state = AppScope.of(context);
     final results = await Future.wait([state.api.masjid(state.masjidSlug), state.api.today(state.masjidSlug)]);
     return (results[0] as Masjid, results[1] as TodayResponse);
   }
 
   void _reload() => setState(() => _future = _load());
+
+  /// Reload at most once a minute, e.g. when the masjid's date rolls over.
+  void _reloadSoon() {
+    if (_lastReload != null && DateTime.now().difference(_lastReload!) < const Duration(minutes: 1)) return;
+    Future.microtask(_reload);
+  }
+
+  _Upcoming? _upcoming(TodayResponse today, DateTime masjidNow) {
+    for (final key in _fard) {
+      final at = today.prayerAt(key);
+      if (at != null && at.isAfter(masjidNow)) {
+        return _Upcoming(key, today.schedule.times[key]!, at.difference(masjidNow));
+      }
+    }
+    // After isha the server already worked out tomorrow's fajr.
+    final next = today.next;
+    if (next != null && next.at.isAfter(DateTime.now())) {
+      return _Upcoming(next.prayer, next.masjidTime, next.at.difference(DateTime.now()));
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,16 +84,20 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
       onRetry: _reload,
       builder: (context, data) {
         final (masjid, today) = data;
+        final masjidNow = today.masjidNow();
+        if (DateFormat('yyyy-MM-dd').format(masjidNow) != today.schedule.date) _reloadSoon();
+        final upcoming = _upcoming(today, masjidNow);
+
         return RefreshIndicator(
           onRefresh: () async => _reload(),
           child: ListView(padding: const EdgeInsets.all(16), children: [
-            _Header(masjid: masjid, today: today),
+            _Header(masjid: masjid, today: today, masjidNow: masjidNow, upcoming: upcoming),
             const SizedBox(height: 16),
             ...prayerLabels.entries.map((e) => _PrayerRow(
                   label: e.key == 'dhuhr' && today.schedule.weekday == 'Friday' ? 'Jumuah' : e.value,
                   adhan: today.schedule.times[e.key],
                   iqamah: today.schedule.iqamah[e.key],
-                  highlighted: today.next?.prayer == e.key,
+                  highlighted: upcoming?.prayer == e.key,
                 )),
             if (masjid.jumuah.isNotEmpty) ...[
               const SizedBox(height: 16),
@@ -87,46 +127,80 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.masjid, required this.today});
+  const _Header({required this.masjid, required this.today, required this.masjidNow, required this.upcoming});
 
   final Masjid masjid;
   final TodayResponse today;
+  final DateTime masjidNow;
+  final _Upcoming? upcoming;
+
+  static String _countdown(Duration d) {
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${d.inHours}h ${two(d.inMinutes.remainder(60))}m ${two(d.inSeconds.remainder(60))}s';
+  }
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final next = today.next;
-    final remaining = next?.at.difference(DateTime.now());
+    final text = Theme.of(context).textTheme;
+    final onPrimary = TextStyle(color: scheme.onPrimary);
+    final updated = today.fetchedAt.toUtc().add(today.utcOffset);
 
     return Card(
       color: scheme.primary,
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: DefaultTextStyle(
-          style: TextStyle(color: scheme.onPrimary),
+          style: onPrimary,
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [
+            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              // Left: masjid and dates.
               Expanded(
-                child: Text(masjid.name, style: Theme.of(context).textTheme.titleLarge?.copyWith(color: scheme.onPrimary)),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Row(children: [
+                    Flexible(child: Text(masjid.name, style: text.titleLarge?.merge(onPrimary))),
+                    IconButton(
+                      tooltip: 'Change masjid',
+                      color: scheme.onPrimary,
+                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(Icons.swap_horiz),
+                      onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MasjidPickerScreen())),
+                    ),
+                  ]),
+                  Text(DateFormat('EEEE, d MMM y').format(masjidNow)),
+                  Text(today.schedule.hijri.formatted),
+                ]),
               ),
-              IconButton(
-                tooltip: 'Change masjid',
-                color: scheme.onPrimary,
-                icon: const Icon(Icons.swap_horiz),
-                onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MasjidPickerScreen())),
-              ),
+              const SizedBox(width: 12),
+              // Right: live clock in the masjid's own timezone.
+              Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                Text(
+                  DateFormat('HH:mm:ss').format(masjidNow),
+                  style: text.headlineMedium?.merge(onPrimary).copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                ),
+                Opacity(opacity: .8, child: Text('Local time', style: text.bodySmall?.merge(onPrimary))),
+              ]),
             ]),
-            Text('${today.schedule.weekday} · ${today.schedule.hijri.formatted}'),
-            if (next != null) ...[
-              const SizedBox(height: 16),
-              Text('Next: ${prayerLabels[next.prayer]}'),
+            if (upcoming != null) ...[
+              const SizedBox(height: 14),
               Text(
-                next.masjidTime,
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(color: scheme.onPrimary, fontWeight: FontWeight.bold),
+                'Next: ${prayerLabels[upcoming!.prayer]} at ${upcoming!.time}',
+                style: text.titleMedium?.merge(onPrimary),
               ),
-              if (remaining != null && !remaining.isNegative)
-                Text('in ${remaining.inHours}h ${remaining.inMinutes.remainder(60)}m'),
+              Text(
+                'in ${_countdown(upcoming!.remaining)}',
+                style: const TextStyle(fontFeatures: [FontFeature.tabularFigures()]),
+              ),
             ],
+            const SizedBox(height: 10),
+            Opacity(
+              opacity: .75,
+              child: Text('Updated ${DateFormat('HH:mm:ss').format(updated)} · ${masjid.timezone} · pull down to refresh',
+                  style: text.bodySmall?.merge(onPrimary)),
+            ),
           ]),
         ),
       ),

@@ -90,10 +90,40 @@ class TodayResponse {
   final NextPrayer? next;
   final String method;
 
+  /// The masjid's UTC offset (e.g. +05:30), taken from the server's `now`.
+  final Duration utcOffset;
+
+  /// When this data was fetched, as an absolute instant.
+  final DateTime fetchedAt;
+
   TodayResponse.fromJson(Map<String, dynamic> j)
       : schedule = DailySchedule.fromJson(j['data']),
         next = j['next_prayer'] == null ? null : NextPrayer.fromJson(j['next_prayer']),
-        method = j['method'];
+        method = j['method'],
+        utcOffset = parseUtcOffset(j['now'] as String? ?? j['next_prayer']?['at'] as String?),
+        fetchedAt = DateTime.now();
+
+  /// Current wall-clock time at the masjid. The returned value is UTC-typed
+  /// but its fields (hour, minute, …) are the masjid's local time, so it can
+  /// be compared with [prayerAt] without the phone's own timezone interfering.
+  DateTime masjidNow() => DateTime.now().toUtc().add(utcOffset);
+
+  /// A prayer time from today's schedule on the same clock as [masjidNow].
+  DateTime? prayerAt(String key) {
+    final hhmm = schedule.times[key];
+    if (hhmm == null) return null;
+    final d = DateTime.parse(schedule.date);
+    return DateTime.utc(d.year, d.month, d.day, int.parse(hhmm.substring(0, 2)), int.parse(hhmm.substring(3, 5)));
+  }
+}
+
+/// Reads the "+05:30" / "-04:00" / "Z" suffix of an ISO-8601 timestamp.
+Duration parseUtcOffset(String? iso) {
+  if (iso == null) return DateTime.now().timeZoneOffset;
+  final m = RegExp(r'([+-])(\d{2}):(\d{2})$').firstMatch(iso);
+  if (m == null) return Duration.zero;
+  final offset = Duration(hours: int.parse(m.group(2)!), minutes: int.parse(m.group(3)!));
+  return m.group(1) == '-' ? -offset : offset;
 }
 
 class RamadanDay {

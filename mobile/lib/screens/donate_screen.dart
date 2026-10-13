@@ -109,7 +109,7 @@ class _DonateScreenState extends State<DonateScreen> {
             Text('Donate to ${masjid.name}', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 16),
             DropdownButtonFormField<int>(
-              value: _fundId,
+              initialValue: _fundId,
               decoration: InputDecoration(labelText: 'Fund', errorText: _serverError('fund_id'), border: const OutlineInputBorder()),
               items: [for (final f in funds) DropdownMenuItem(value: f.id, child: Text(f.name))],
               onChanged: (v) => setState(() => _fundId = v),
@@ -127,7 +127,7 @@ class _DonateScreenState extends State<DonateScreen> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: _method,
+              initialValue: _method,
               decoration: const InputDecoration(labelText: 'Paying by', border: OutlineInputBorder()),
               items: [for (final e in _methods.entries) DropdownMenuItem(value: e.key, child: Text(e.value))],
               onChanged: (v) => setState(() => _method = v!),

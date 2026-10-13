@@ -192,3 +192,12 @@ details summary { cursor: pointer; color: var(--primary); }
 }
 .pagination .page-item.active .page-link { background: var(--primary); color: var(--primary-ink); border-color: var(--primary); }
 .pagination .page-item.disabled .page-link { color: var(--muted); }
+
+/* Live clock, right side of the top bar */
+.clock { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.15; padding-left: .75rem; margin-left: .25rem; border-left: 1px solid rgba(255,255,255,.25); }
+.clock-time { font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+.clock-date { font-size: .72rem; opacity: .85; white-space: nowrap; }
+@media (max-width: 600px) {
+    .clock { margin-left: auto; border-left: 0; padding-left: 0; }
+    .clock-date { display: none; }
+}

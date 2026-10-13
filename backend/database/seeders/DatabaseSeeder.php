@@ -18,8 +18,8 @@ class DatabaseSeeder extends Seeder
     public function run(ProvisionMasjid $provision, DonationService $donations, LedgerService $ledger): void
     {
         $masjid = $provision([
-            'name' => 'Masjid-e-Fatima',
-            'slug' => 'masjid-e-fatima',
+            'name' => 'Masjid-A-Fatima',
+            'slug' => 'al-noor',
             'address' => '12 Mosque Road, Tolichowki',
             'city' => 'Hyderabad',
             'country' => 'IN',
@@ -31,7 +31,7 @@ class DatabaseSeeder extends Seeder
             'calculation_method' => 'karachi',
             'asr_method' => 'hanafi',
             'currency' => 'INR',
-            'bank_details' => "Account: Masjid-e-Fatima Trust\nA/C 000123456789 · IFSC DEMO0000123\nUPI: masjidefatima@demo",
+            'bank_details' => "Account: Masjid Al-Noor Trust\nA/C 000123456789 · IFSC DEMO0000123\nUPI: alnoor@demo",
         ], ['name' => 'Masjid Admin', 'email' => 'admin@masjid.test', 'password' => 'password']);
 
         $treasurer = new User(['name' => 'Treasurer', 'email' => 'treasurer@masjid.test', 'password' => 'password']);

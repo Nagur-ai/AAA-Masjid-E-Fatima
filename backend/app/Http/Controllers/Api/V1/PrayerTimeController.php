@@ -34,6 +34,8 @@ class PrayerTimeController extends Controller
         return response()->json([
             'masjid' => ['slug' => $masjid->slug, 'name' => $masjid->name, 'timezone' => $masjid->timezone],
             'method' => $masjid->calculation_method->label(),
+            // Server time in the masjid's timezone; clients use its UTC offset for a live local clock.
+            'now' => $now->toIso8601String(),
             'data' => $schedule->toArray(),
             'next_prayer' => $next ? ['prayer' => $next['prayer'], 'at' => $next['at']->toIso8601String()] : null,
         ])->setCache(['public' => true, 'max_age' => 300]);
