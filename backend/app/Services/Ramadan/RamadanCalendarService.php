@@ -66,6 +66,7 @@ class RamadanCalendarService
                 'day' => $number,
                 'date' => $daily['date'],
                 'weekday' => $daily['weekday'],
+                'weekday_te' => $daily['weekday_te'],
                 'hijri' => $daily['hijri'],
                 'sehri_ends' => $daily['times']['fajr'],
                 'imsak' => $daily['times']['imsak'],
@@ -90,6 +91,7 @@ class RamadanCalendarService
             'notes' => $calendar->notes,
             'eid_al_fitr' => $end->addDay()->toDateString(),
             'days' => $days,
+            'duas' => config('ramadan.duas'),
         ];
     }
 }

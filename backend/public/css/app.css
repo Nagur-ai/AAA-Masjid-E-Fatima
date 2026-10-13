@@ -201,3 +201,63 @@ details summary { cursor: pointer; color: var(--primary); }
     .clock { margin-left: auto; border-left: 0; padding-left: 0; }
     .clock-date { display: none; }
 }
+
+/* Ramadan calendar and duas (dashboard + public Ramadan page) */
+:root {
+    --p-sehri: #6d4bb3; --p-fajr: #2f6fb5; --p-dhuhr: #b8862b;
+    --p-asr: #c26a1b; --p-iftar: #0f6b4f; --p-isha: #3b4a8f;
+    --friday: #fff1c7; --friday-edge: #d9a521;
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --p-sehri: #b39ae8; --p-fajr: #7fb2ea; --p-dhuhr: #e0b25a;
+        --p-asr: #ef9d5c; --p-iftar: #3fb488; --p-isha: #9aa6e8;
+        --friday: #3a3020; --friday-edge: #e0b25a;
+    }
+}
+[lang="te"] { font-family: "Nirmala UI", "Noto Sans Telugu", "Gautami", "Ramabhadra", sans-serif; }
+
+.card .ramadan-days { max-height: 640px; overflow: auto; }
+.ramadan-table { border-collapse: collapse; }
+.ramadan-table th, .ramadan-table td { border: 1px solid var(--border); white-space: nowrap; }
+.ramadan-table thead th { position: sticky; top: 0; z-index: 1; background: var(--surface); }
+.ramadan-table th small { display: block; font-weight: 500; text-transform: none; letter-spacing: 0; }
+
+/* Each prayer column: its own coloured borders and a light tint */
+
+.ramadan-table .p-col { text-align: center; font-variant-numeric: tabular-nums;
+    border-left: 2px solid var(--pc); border-right: 2px solid var(--pc);
+    background: color-mix(in srgb, var(--pc) 7%, var(--surface)); }
+.ramadan-table thead .p-col { border-top: 4px solid var(--pc); color: var(--pc);
+    background: color-mix(in srgb, var(--pc) 16%, var(--surface)); }
+.ramadan-table tbody tr:last-child .p-col { border-bottom: 2px solid var(--pc); }
+.ramadan-table { --pc: var(--primary); }
+.ramadan-table .p-sehri { --pc: var(--p-sehri); } .ramadan-table .p-fajr { --pc: var(--p-fajr); }
+.ramadan-table .p-dhuhr { --pc: var(--p-dhuhr); } .ramadan-table .p-asr { --pc: var(--p-asr); }
+.ramadan-table .p-iftar { --pc: var(--p-iftar); } .ramadan-table .p-isha { --pc: var(--p-isha); }
+
+/* Fridays (Jumuah) and today */
+.ramadan-table tr.friday td { background: var(--friday); font-weight: 600; }
+.ramadan-table tr.friday td.p-col { background: color-mix(in srgb, var(--pc) 14%, var(--friday)); }
+.ramadan-table tr.friday td:first-child { box-shadow: inset 4px 0 0 var(--friday-edge); }
+.ramadan-table tr.today td { background: var(--primary-soft); }
+.ramadan-table tr.today td:first-child { box-shadow: inset 4px 0 0 var(--primary); }
+.badge.jumuah { background: var(--friday-edge); color: #1d2420; }
+.ramadan-legend { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 8px 0 0; font-size: .85rem; }
+.swatch { display: inline-block; width: 14px; height: 14px; border-radius: 3px; margin-left: 8px; }
+.swatch:first-child { margin-left: 0; }
+.swatch.friday { background: var(--friday); border: 2px solid var(--friday-edge); }
+.swatch.today { background: var(--primary-soft); border: 2px solid var(--primary); }
+
+/* Duas in Telugu */
+.duas { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.dua { --pc: var(--primary); border: 1px solid var(--border); border-top: 4px solid var(--pc); border-radius: var(--radius);
+    padding: 12px 14px; background: color-mix(in srgb, var(--pc) 6%, var(--surface)); }
+.dua-sehri { --pc: var(--p-sehri); } .dua-iftar { --pc: var(--p-iftar); }
+.dua p { margin: 6px 0; line-height: 1.6; }
+.dua-title { color: var(--pc); font-size: 1.05rem; }
+.dua-telugu { font-size: 1.15rem; font-weight: 700; }
+@media print {
+    .ramadan-days { max-height: none; overflow: visible; }
+    .dua { break-inside: avoid; }
+}

@@ -63,7 +63,7 @@ class DashboardController extends Controller
 
         if ($shows(Role::PANEL_RAMADAN)) {
             $year = $ramadan->upcomingYear($masjid, $today);
-            $data['ramadan'] = $ramadan->calendarFor($masjid, $year);
+            $data['ramadan'] = $ramadan->build($masjid, $year);
         }
 
         if ($shows(Role::PANEL_STAFF)) {

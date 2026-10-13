@@ -45,6 +45,7 @@ final readonly class DailySchedule
         return [
             'date' => $this->date->toDateString(),
             'weekday' => $this->date->format('l'),
+            'weekday_te' => $this->date->locale('te')->dayName,
             'hijri' => $this->hijri->toArray(),
             'times' => array_map($format, $this->times),
             'iqamah' => array_map($format, $this->iqamah),

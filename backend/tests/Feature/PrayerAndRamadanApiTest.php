@@ -33,6 +33,7 @@ class PrayerAndRamadanApiTest extends TestCase
 
         $response->assertJsonPath('data.date', '2026-10-02')
             ->assertJsonPath('data.weekday', 'Friday')
+            ->assertJsonPath('data.weekday_te', 'శుక్రవారం')
             ->assertJsonPath('data.times.fajr', '05:11')
             ->assertJsonPath('data.iqamah.fajr', '05:35') // 05:31 rounded up to 5 minutes
             ->assertJsonPath('data.iqamah.isha', '20:45')
@@ -70,7 +71,11 @@ class PrayerAndRamadanApiTest extends TestCase
             ->assertJsonPath('data.is_confirmed', false)
             ->assertJsonPath('data.days.0.day', 1)
             ->assertJsonPath('data.days.0.hijri.month_name', 'Ramadan')
-            ->assertJsonPath('data.days.19.odd_night_after_iftar', 21);
+            ->assertJsonPath('data.days.19.odd_night_after_iftar', 21)
+            ->assertJsonPath('data.days.0.weekday_te', 'బుధవారం')
+            ->assertJsonPath('data.duas.0.key', 'sehri')
+            ->assertJsonPath('data.duas.1.key', 'iftar')
+            ->assertJsonPath('data.duas.1.telugu', 'అల్లాహుమ్మ లక సుమ్తు వ అలా రిజ్ఖిక అఫ్తర్తు');
     }
 
     public function test_admin_confirms_moon_sighted_start(): void

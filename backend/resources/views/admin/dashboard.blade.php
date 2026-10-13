@@ -13,7 +13,7 @@
     <div class="page-head">
         <div>
             <h1>Assalamu alaikum, {{ auth()->user()->name }}</h1>
-            <span class="muted">{{ $today->format('l j F Y') }} &middot; {{ $hijri->format() }}
+            <span class="muted">{{ $today->format('l') }} (<span lang="te">{{ $today->locale('te')->dayName }}</span>) {{ $today->format('j F Y') }} &middot; {{ $hijri->format() }}
                 &middot; <span class="badge {{ $role === Role::Admin ? 'confirmed' : 'pending' }}">{{ $role->label() }}</span></span>
         </div>
         <div class="actions">
@@ -119,21 +119,6 @@
             </div>
         @endif
 
-        @if ($has(Role::PANEL_RAMADAN))
-            <div class="card">
-                <div class="page-head" style="margin-bottom:8px">
-                    <h2 style="margin:0">Ramadan {{ $ramadan->hijri_year }}</h2>
-                    <span class="badge {{ $ramadan->is_confirmed ? 'confirmed' : 'estimated' }}">{{ $ramadan->is_confirmed ? 'confirmed' : 'estimated' }}</span>
-                </div>
-                <p>Starts <strong>{{ $ramadan->starts_on->format('l j F Y') }}</strong> &middot; {{ $ramadan->total_days }} days
-                    @if ($ramadan->taraweeh_time) &middot; Taraweeh {{ substr($ramadan->taraweeh_time, 0, 5) }} @endif</p>
-                @unless ($ramadan->is_confirmed)
-                    <p class="muted">Confirm the start date after the moon sighting so the community sees the right timetable.</p>
-                @endunless
-                <a class="btn secondary" href="{{ route('admin.ramadan.edit', $ramadan->hijri_year) }}">Manage Ramadan</a>
-            </div>
-        @endif
-
         @if ($has(Role::PANEL_STAFF))
             <div class="card">
                 <div class="page-head" style="margin-bottom:8px">
@@ -153,6 +138,47 @@
             </div>
         @endif
     </div>
+
+    @if ($has(Role::PANEL_RAMADAN))
+        @php($todayStr = $today->toDateString())
+        @php($ramadanToday = collect($ramadan['days'])->firstWhere('date', $todayStr))
+        @php($date = fn (string $d, string $f) => \Carbon\Carbon::parse($d)->format($f))
+        <div class="card" style="margin-top:16px">
+            <div class="page-head" style="margin-bottom:8px">
+                <div>
+                    <h2 style="margin:0">Ramadan {{ $ramadan['hijri_year'] }} <span lang="te" class="muted">· రమజాన్ క్యాలెండర్</span></h2>
+                    <span class="muted">
+                        {{ $date($ramadan['starts_on'], 'D j M') }} – {{ $date($ramadan['ends_on'], 'D j M Y') }}
+                        &middot; {{ $ramadan['total_days'] }} days
+                        &middot; Eid al-Fitr {{ $date($ramadan['eid_al_fitr'], 'D j M') }}
+                        @if ($ramadan['taraweeh_time']) &middot; Taraweeh {{ $ramadan['taraweeh_time'] }} @endif
+                    </span>
+                </div>
+                <div class="actions">
+                    <span class="badge {{ $ramadan['is_confirmed'] ? 'confirmed' : 'estimated' }}">{{ $ramadan['is_confirmed'] ? 'confirmed' : 'estimated' }}</span>
+                    <a class="btn secondary" href="{{ route('admin.ramadan.edit', $ramadan['hijri_year']) }}">Manage Ramadan</a>
+                </div>
+            </div>
+            @unless ($ramadan['is_confirmed'])
+                <div class="alert warn">These dates are estimated. Confirm the start date after the moon sighting so the community sees the right timetable.</div>
+            @endunless
+
+            @if ($ramadanToday)
+                <div class="grid grid-3" style="margin-bottom:16px">
+                    <div class="card stat"><div class="label">Today · Roza {{ $ramadanToday['day'] }}</div><div class="value" lang="te">{{ $ramadanToday['weekday_te'] }}</div></div>
+                    <div class="card stat"><div class="label">Sehri ends · <span lang="te">సహరీ</span></div><div class="value">{{ $ramadanToday['sehri_ends'] }}</div></div>
+                    <div class="card stat"><div class="label">Iftar · <span lang="te">ఇఫ్తార్</span></div><div class="value">{{ $ramadanToday['iftar'] }}</div></div>
+                </div>
+            @endif
+
+            <h3 lang="te" style="margin-top:0">సహరీ & ఇఫ్తార్ దుఆలు</h3>
+            @include('partials.ramadan-duas', ['duas' => $ramadan['duas']])
+
+            <div style="margin-top:16px">
+                @include('partials.ramadan-table', ['days' => $ramadan['days'], 'todayStr' => $todayStr])
+            </div>
+        </div>
+    @endif
 
     @if ($has(Role::PANEL_DONATIONS))
         <div class="card" style="margin-top:16px">

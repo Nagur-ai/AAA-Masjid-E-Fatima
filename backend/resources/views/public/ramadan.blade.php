@@ -28,33 +28,12 @@
         </div>
     @endif
 
-    <div class="table-wrap">
-        <table>
-            <thead>
-            <tr><th>Day</th><th>Date</th><th>Sehri ends</th><th>Fajr</th><th>Dhuhr</th><th>Asr</th><th>Iftar</th><th>Isha</th><th></th></tr>
-            </thead>
-            <tbody>
-            @foreach ($calendar['days'] as $d)
-                <tr @class(['highlight' => $d['date'] === $today])>
-                    <td><strong>{{ $d['day'] }}</strong></td>
-                    <td>{{ \Carbon\Carbon::parse($d['date'])->format('D j M') }}</td>
-                    <td><strong>{{ $d['sehri_ends'] }}</strong> <small>imsak {{ $d['imsak'] }}</small></td>
-                    <td>{{ $d['times']['fajr'] }}</td>
-                    <td>{{ $d['times']['dhuhr'] }}</td>
-                    <td>{{ $d['times']['asr'] }}</td>
-                    <td><strong>{{ $d['iftar'] }}</strong></td>
-                    <td>{{ $d['times']['isha'] }}</td>
-                    <td>
-                        @if ($d['odd_night_after_iftar'])
-                            <span class="badge pending">Night {{ $d['odd_night_after_iftar'] }}</span>
-                        @elseif ($d['is_last_ten'])
-                            <span class="badge">Last 10</span>
-                        @endif
-                    </td>
-                </tr>
-            @endforeach
-            </tbody>
-        </table>
+    <div class="card" style="margin-bottom:16px">
+        <h2 lang="te">సహరీ & ఇఫ్తార్ దుఆలు</h2>
+        @include('partials.ramadan-duas', ['duas' => $calendar['duas']])
     </div>
+
+    @include('partials.ramadan-table', ['days' => $calendar['days'], 'todayStr' => $today])
     <p class="muted" style="margin-top:8px">Sehri ends at Fajr; stop eating by imsak to be safe. Odd nights of the last ten, when Laylat al-Qadr is sought, begin after iftar on the marked day.</p>
+
 @endsection

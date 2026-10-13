@@ -130,6 +130,8 @@ class RamadanDay {
   final int day;
   final String date;
   final String weekday;
+  /// Telugu weekday name, e.g. "సోమవారం" (absent on older servers).
+  final String? weekdayTe;
   final String? sehriEnds;
   final String? imsak;
   final String? iftar;
@@ -141,6 +143,7 @@ class RamadanDay {
       : day = j['day'],
         date = j['date'],
         weekday = j['weekday'],
+        weekdayTe = j['weekday_te'],
         sehriEnds = j['sehri_ends'],
         imsak = j['imsak'],
         iftar = j['iftar'],
@@ -158,6 +161,7 @@ class RamadanCalendar {
   final String? taraweehTime;
   final String? notes;
   final List<RamadanDay> days;
+  final List<Dua> duas;
 
   RamadanCalendar.fromJson(Map<String, dynamic> j)
       : hijriYear = j['hijri_year'],
@@ -167,7 +171,34 @@ class RamadanCalendar {
         isConfirmed = j['is_confirmed'],
         taraweehTime = j['taraweeh_time'],
         notes = j['notes'],
-        days = (j['days'] as List).map((e) => RamadanDay.fromJson(e)).toList();
+        days = (j['days'] as List).map((e) => RamadanDay.fromJson(e)).toList(),
+        duas = ((j['duas'] as List?) ?? []).map((e) => Dua.fromJson(e)).toList();
+}
+
+/// A sehri or iftar dua with its Telugu transliteration and meaning.
+class Dua {
+  final String key;
+  final String title;
+  final String titleTe;
+  final String arabic;
+  final String transliteration;
+  final String telugu;
+  final String meaningTe;
+  final String meaningEn;
+  final String? noteTe;
+  final String? source;
+
+  Dua.fromJson(Map<String, dynamic> j)
+      : key = j['key'],
+        title = j['title'],
+        titleTe = j['title_te'],
+        arabic = j['arabic'],
+        transliteration = j['transliteration'],
+        telugu = j['telugu'],
+        meaningTe = j['meaning_te'],
+        meaningEn = j['meaning_en'],
+        noteTe = j['note_te'],
+        source = j['source'];
 }
 
 class Fund {
