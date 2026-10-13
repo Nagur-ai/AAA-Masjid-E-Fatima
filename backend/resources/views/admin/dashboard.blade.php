@@ -144,6 +144,7 @@
         @php($ramadanToday = collect($ramadan['days'])->firstWhere('date', $todayStr))
         @php($date = fn (string $d, string $f) => \Carbon\Carbon::parse($d)->format($f))
         <div class="card" style="margin-top:16px">
+            @include('partials.ramadan-image', ['url' => $ramadan['timetable_image_url']])
             <div class="page-head" style="margin-bottom:8px">
                 <div>
                     <h2 style="margin:0">Ramadan {{ $ramadan['hijri_year'] }} <span lang="te" class="muted">· రమజాన్ క్యాలెండర్</span></h2>

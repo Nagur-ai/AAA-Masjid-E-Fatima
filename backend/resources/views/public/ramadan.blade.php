@@ -3,6 +3,8 @@
 @section('title', $masjid->name.' · Ramadan '.$calendar['hijri_year'])
 
 @section('content')
+    @include('partials.ramadan-image', ['url' => $calendar['timetable_image_url']])
+
     <div class="page-head">
         <div>
             <h1>Ramadan {{ $calendar['hijri_year'] }} AH</h1>

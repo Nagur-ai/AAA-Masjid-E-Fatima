@@ -257,6 +257,9 @@ details summary { cursor: pointer; color: var(--primary); }
 .dua p { margin: 6px 0; line-height: 1.6; }
 .dua-title { color: var(--pc); font-size: 1.05rem; }
 .dua-telugu { font-size: 1.15rem; font-weight: 700; }
+.timetable-image { display: block; max-width: 760px; margin: 0 auto 16px; border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; background: #fff; box-shadow: var(--shadow); }
+.timetable-image img { display: block; width: 100%; height: auto; }
 @media print {
     .ramadan-days { max-height: none; overflow: visible; }
     .dua { break-inside: avoid; }

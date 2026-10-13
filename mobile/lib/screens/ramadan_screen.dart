@@ -45,6 +45,7 @@ class _RamadanScreenState extends State<RamadanScreen> {
       builder: (context, cal) {
         final today = cal.days.where((d) => d.date == todayStr).firstOrNull;
         return ListView(padding: const EdgeInsets.all(16), children: [
+          if (cal.timetableImageUrl != null) _TimetableImage(url: cal.timetableImageUrl!),
           Row(children: [
             IconButton(icon: const Icon(Icons.chevron_left), onPressed: () => _shift(-1)),
             Expanded(
@@ -117,6 +118,41 @@ class _BigTime extends StatelessWidget {
         Text(label),
         Text(time ?? '—', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
       ]);
+}
+
+/// The masjid's printed timetable; tap to open it full screen with zoom.
+class _TimetableImage extends StatelessWidget {
+  const _TimetableImage({required this.url});
+
+  final String url;
+
+  @override
+  Widget build(BuildContext context) => Card(
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => showDialog<void>(
+            context: context,
+            builder: (_) => Dialog.fullscreen(
+              child: Stack(children: [
+                InteractiveViewer(maxScale: 5, child: Center(child: Image.network(url))),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: IconButton.filledTonal(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ),
+              ]),
+            ),
+          ),
+          child: Image.network(
+            url,
+            fit: BoxFit.fitWidth,
+            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+          ),
+        ),
+      );
 }
 
 class _DuaView extends StatelessWidget {

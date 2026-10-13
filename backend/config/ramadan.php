@@ -13,6 +13,10 @@
 */
 
 return [
+    // The masjid's printed timetable, shown at the top of the Ramadan pages and
+    // the app. A path under public/; set to null to hide it.
+    'timetable_image' => 'images/ramadan-timetable.jpg',
+
     'duas' => [
         [
             'key' => 'sehri',

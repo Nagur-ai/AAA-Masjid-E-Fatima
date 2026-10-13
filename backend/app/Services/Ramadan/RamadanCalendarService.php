@@ -92,6 +92,7 @@ class RamadanCalendarService
             'eid_al_fitr' => $end->addDay()->toDateString(),
             'days' => $days,
             'duas' => config('ramadan.duas'),
+            'timetable_image_url' => config('ramadan.timetable_image') ? asset(config('ramadan.timetable_image')) : null,
         ];
     }
 }

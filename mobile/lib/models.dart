@@ -162,6 +162,8 @@ class RamadanCalendar {
   final String? notes;
   final List<RamadanDay> days;
   final List<Dua> duas;
+  /// The masjid's printed timetable image, if it has one.
+  final String? timetableImageUrl;
 
   RamadanCalendar.fromJson(Map<String, dynamic> j)
       : hijriYear = j['hijri_year'],
@@ -172,7 +174,8 @@ class RamadanCalendar {
         taraweehTime = j['taraweeh_time'],
         notes = j['notes'],
         days = (j['days'] as List).map((e) => RamadanDay.fromJson(e)).toList(),
-        duas = ((j['duas'] as List?) ?? []).map((e) => Dua.fromJson(e)).toList();
+        duas = ((j['duas'] as List?) ?? []).map((e) => Dua.fromJson(e)).toList(),
+        timetableImageUrl = j['timetable_image_url'];
 }
 
 /// A sehri or iftar dua with its Telugu transliteration and meaning.

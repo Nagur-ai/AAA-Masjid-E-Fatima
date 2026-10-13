@@ -74,6 +74,7 @@ class PrayerAndRamadanApiTest extends TestCase
             ->assertJsonPath('data.days.19.odd_night_after_iftar', 21)
             ->assertJsonPath('data.days.0.weekday_te', 'బుధవారం')
             ->assertJsonPath('data.duas.0.key', 'sehri')
+            ->assertJsonPath('data.timetable_image_url', asset('images/ramadan-timetable.jpg'))
             ->assertJsonPath('data.duas.1.key', 'iftar')
             ->assertJsonPath('data.duas.1.telugu', 'అల్లాహుమ్మ లక సుమ్తు వ బిక ఆమన్తు వ అలైక తవక్కల్తు వ అలా రిజ్ఖిక అఫ్తర్తు ఫతఖబ్బల్ మిన్నీ');
     }

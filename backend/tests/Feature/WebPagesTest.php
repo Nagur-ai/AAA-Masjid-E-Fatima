@@ -76,7 +76,7 @@ class WebPagesTest extends TestCase
             ->assertSee('Fund balances')->assertSee('Latest expenses')->assertSee('Pledges waiting for payment')
             ->assertSee("Today's prayers", false)->assertSee('Manage Ramadan')->assertSee('treasurer@masjid.test')
             ->assertSee('రమజాన్ క్యాలెండర్')->assertSee('ఇఫ్తార్ దుఆ')->assertSee('సోమవారం')
-            ->assertSee('<tr class="friday">', false)->assertSee('Jumuah')->assertDontSee('dua-iftar_after');
+            ->assertSee('<tr class="friday">', false)->assertSee('images/ramadan-timetable.jpg')->assertSee('Jumuah')->assertDontSee('dua-iftar_after');
 
         $this->actingAs($treasurer)->get('/admin')->assertOk()
             ->assertSee('Fund balances')->assertSee('Latest expenses')->assertSee('Pledges waiting for payment')
