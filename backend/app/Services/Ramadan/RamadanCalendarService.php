@@ -91,8 +91,8 @@ class RamadanCalendarService
             'notes' => $calendar->notes,
             'eid_al_fitr' => $end->addDay()->toDateString(),
             'days' => $days,
-            'duas' => config('ramadan.duas'),
-            'timetable_image_url' => config('ramadan.timetable_image') ? asset(config('ramadan.timetable_image')) : null,
+            'duas' => $masjid->ramadanDuas()->where('is_active', true)->get()->map->toPublicArray()->all(),
+            'timetable_image_url' => $masjid->ramadan_image_path ? route('masjid.ramadan.image', $masjid) : null,
         ];
     }
 }

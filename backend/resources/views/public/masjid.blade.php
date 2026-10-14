@@ -21,7 +21,9 @@
 
     <div class="prayers" style="margin-bottom:16px">
         @foreach (['fajr' => 'Fajr', 'sunrise' => 'Sunrise', 'dhuhr' => 'Dhuhr', 'asr' => 'Asr', 'maghrib' => 'Maghrib', 'isha' => 'Isha'] as $key => $label)
-            <div @class(['prayer', 'is-next' => $next && $next['prayer'] === $key && $next['at']->isSameDay($today->date)])>
+            @php($isNext = $next && $next['prayer'] === $key)
+            <div @class(['prayer', 'is-next' => $isNext])>
+                @if ($isNext)<span class="next-tag">{{ $next['at']->isSameDay($today->date) ? 'Next' : 'Next · tomorrow' }}</span>@endif
                 <div class="name">{{ $key === 'dhuhr' && $today->date->isFriday() ? 'Jumuah' : $label }}</div>
                 <div class="adhan">{{ $today->times[$key]?->format('H:i') ?? '—' }}</div>
                 <div class="iqamah">

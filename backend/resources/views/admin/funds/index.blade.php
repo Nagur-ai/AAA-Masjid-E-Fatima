@@ -24,6 +24,10 @@
                         <details>
                             <summary>Edit</summary>
                             @include('admin.funds._form', ['fund' => $fund, 'action' => route('admin.funds.update', $fund), 'method' => 'PUT'])
+                            <form method="POST" action="{{ route('admin.funds.destroy', $fund) }}" style="margin-top:8px" onsubmit="return confirm('Delete {{ $fund->name }}?')">
+                                @csrf @method('DELETE')
+                                <button class="btn small danger" type="submit">Delete fund</button>
+                            </form>
                         </details>
                     </td>
                 </tr>
@@ -39,11 +43,37 @@
         </div>
         <div class="card">
             <h2>Ledger categories</h2>
-            <p>
-                @foreach ($categories as $c)
-                    <span class="badge {{ $c->type->value }}">{{ $c->name }}</span>
-                @endforeach
-            </p>
+            <div class="table-wrap" style="margin-bottom:12px">
+                <table>
+                    <thead><tr><th>Category</th><th>Type</th><th></th></tr></thead>
+                    <tbody>
+                    @foreach ($categories as $c)
+                        <tr>
+                            <td>
+                                @if ($c->is_system)
+                                    {{ $c->name }} <span class="badge">system</span>
+                                @else
+                                    <form method="POST" action="{{ route('admin.categories.update', $c) }}" class="actions" style="align-items:center">
+                                        @csrf @method('PUT')
+                                        <input name="name" value="{{ $c->name }}" maxlength="80" required style="width:auto;flex:1;min-width:140px" aria-label="Category name">
+                                        <button class="btn small secondary" type="submit">Rename</button>
+                                    </form>
+                                @endif
+                            </td>
+                            <td><span class="badge {{ $c->type->value }}">{{ $c->type->value }}</span></td>
+                            <td>
+                                @unless ($c->is_system)
+                                    <form method="POST" action="{{ route('admin.categories.destroy', $c) }}" class="inline" onsubmit="return confirm('Delete {{ $c->name }}?')">
+                                        @csrf @method('DELETE')
+                                        <button class="btn small danger" type="submit">Delete</button>
+                                    </form>
+                                @endunless
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
             <form method="POST" action="{{ route('admin.categories.store') }}" class="form-grid">
                 @csrf
                 <div class="field"><label for="cat_name">Name</label><input id="cat_name" name="name" required></div>

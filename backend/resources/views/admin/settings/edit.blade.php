@@ -83,10 +83,20 @@
                                 <td>{{ $r->effective_from->format('j M Y') }}</td>
                                 <td>{{ $r->effective_to?->format('j M Y') ?? '—' }}</td>
                                 <td>
-                                    <form method="POST" action="{{ route('admin.settings.iqamah.destroy', $r) }}" class="inline" onsubmit="return confirm('Remove this rule?')">
-                                        @csrf @method('DELETE')
-                                        <button class="btn small secondary" type="submit">Remove</button>
-                                    </form>
+                                    <div class="actions">
+                                        <form method="POST" action="{{ route('admin.settings.iqamah.destroy', $r) }}" class="inline" onsubmit="return confirm('Remove this rule?')">
+                                            @csrf @method('DELETE')
+                                            <button class="btn small danger" type="submit">Remove</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="edit-row">
+                                <td colspan="5">
+                                    <details>
+                                        <summary>Edit {{ $p->label() }} rule</summary>
+                                        @include('admin.settings._iqamah_form', ['rule' => $r, 'action' => route('admin.settings.iqamah.update', $r), 'method' => 'PUT'])
+                                    </details>
                                 </td>
                             </tr>
                         @endforeach
@@ -94,44 +104,29 @@
                     </tbody>
                 </table>
             </div>
-            <form method="POST" action="{{ route('admin.settings.iqamah.store') }}" class="form-grid">
-                @csrf
-                <div class="field"><label for="prayer">Prayer</label>
-                    <select id="prayer" name="prayer">@foreach ($prayers as $p)<option value="{{ $p->value }}">{{ $p->label() }}</option>@endforeach</select>
-                </div>
-                <div class="field"><label for="mode">Mode</label>
-                    <select id="mode" name="mode"><option value="offset">Minutes after adhan</option><option value="fixed">Fixed time</option></select>
-                </div>
-                <div class="field"><label for="offset_minutes">Minutes after adhan</label><input id="offset_minutes" name="offset_minutes" type="number" min="0" max="120"></div>
-                <div class="field"><label for="round_to_minutes">Round up to</label>
-                    <select id="round_to_minutes" name="round_to_minutes"><option value="0">No rounding</option><option>5</option><option>10</option><option>15</option></select>
-                </div>
-                <div class="field"><label for="fixed_time">Fixed time</label><input id="fixed_time" name="fixed_time" type="time"></div>
-                <div class="field"><label for="effective_from">Effective from</label><input id="effective_from" name="effective_from" type="date" value="{{ now($masjid->timezone)->toDateString() }}" required></div>
-                <div class="field"><label for="effective_to">Until (optional)</label><input id="effective_to" name="effective_to" type="date"></div>
-                <div class="field full"><button class="btn secondary" type="submit">Add iqamah rule</button></div>
-            </form>
+            <h3>Add an iqamah rule</h3>
+            @include('admin.settings._iqamah_form', ['rule' => null, 'action' => route('admin.settings.iqamah.store'), 'method' => 'POST'])
         </div>
 
         <div class="card">
             <h2>Jumuah sessions</h2>
             @foreach ($jumuah as $s)
-                <div class="actions" style="align-items:center;margin-bottom:8px">
-                    <strong>{{ $s->label }}</strong>{{ $s->language ? " ({$s->language})" : '' }}: khutbah {{ substr($s->khutbah_time, 0, 5) }}, iqamah {{ substr($s->iqamah_time, 0, 5) }}
-                    <form method="POST" action="{{ route('admin.settings.jumuah.destroy', $s) }}" class="inline">
-                        @csrf @method('DELETE')
-                        <button class="btn small secondary" type="submit">Remove</button>
-                    </form>
+                <div class="list-item">
+                    <div class="actions" style="align-items:center;justify-content:space-between">
+                        <span><strong>{{ $s->label }}</strong>{{ $s->language ? " ({$s->language})" : '' }}: khutbah {{ substr($s->khutbah_time, 0, 5) }}, iqamah {{ substr($s->iqamah_time, 0, 5) }}</span>
+                        <form method="POST" action="{{ route('admin.settings.jumuah.destroy', $s) }}" class="inline" onsubmit="return confirm('Remove this Jumuah session?')">
+                            @csrf @method('DELETE')
+                            <button class="btn small danger" type="submit">Remove</button>
+                        </form>
+                    </div>
+                    <details>
+                        <summary>Edit</summary>
+                        @include('admin.settings._jumuah_form', ['session' => $s, 'action' => route('admin.settings.jumuah.update', $s), 'method' => 'PUT'])
+                    </details>
                 </div>
             @endforeach
-            <form method="POST" action="{{ route('admin.settings.jumuah.store') }}" class="form-grid">
-                @csrf
-                <div class="field"><label for="label">Label</label><input id="label" name="label" value="Jumuah" required></div>
-                <div class="field"><label for="language">Language</label><input id="language" name="language"></div>
-                <div class="field"><label for="khutbah_time">Khutbah</label><input id="khutbah_time" name="khutbah_time" type="time" required></div>
-                <div class="field"><label for="iqamah_time">Iqamah</label><input id="iqamah_time" name="iqamah_time" type="time" required></div>
-                <div class="field full"><button class="btn secondary" type="submit">Add session</button></div>
-            </form>
+            <h3>Add a session</h3>
+            @include('admin.settings._jumuah_form', ['session' => null, 'action' => route('admin.settings.jumuah.store'), 'method' => 'POST'])
         </div>
     </div>
 @endsection

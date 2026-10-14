@@ -7,6 +7,7 @@ use App\Enums\TransactionType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreFundRequest;
 use App\Models\Fund;
+use App\Models\TransactionCategory;
 use App\Services\Finance\LedgerService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -42,6 +43,20 @@ class FundController extends Controller
         return back()->with('status', "{$fund->name} updated.");
     }
 
+    /**
+     * Only a fund with no donations or ledger entries can be deleted; otherwise deactivate it.
+     */
+    public function destroy(Fund $fund): RedirectResponse
+    {
+        $this->ensureOwned($fund);
+        if ($fund->donations()->exists() || $fund->transactions()->exists()) {
+            return back()->withErrors(['fund' => "{$fund->name} has donations or ledger entries, so it cannot be deleted. Untick Active to hide it instead."]);
+        }
+        $fund->delete();
+
+        return back()->with('status', "{$fund->name} deleted.");
+    }
+
     public function storeCategory(Request $request): RedirectResponse
     {
         $masjid = $this->masjid();
@@ -53,6 +68,36 @@ class FundController extends Controller
         $masjid->categories()->create($data);
 
         return back()->with('status', 'Category added.');
+    }
+
+    public function updateCategory(Request $request, TransactionCategory $category): RedirectResponse
+    {
+        $this->ensureOwned($category);
+        if ($category->is_system) {
+            return back()->withErrors(['category' => "{$category->name} is used for every donation and cannot be changed."]);
+        }
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:80',
+                Rule::unique('transaction_categories')->where('masjid_id', $category->masjid_id)
+                    ->where('type', $category->type->value)->ignore($category->id)],
+        ]);
+        $category->update($data);
+
+        return back()->with('status', 'Category renamed.');
+    }
+
+    /**
+     * Only an unused, non-system category can be deleted.
+     */
+    public function destroyCategory(TransactionCategory $category): RedirectResponse
+    {
+        $this->ensureOwned($category);
+        if ($category->is_system || $this->masjid()->transactions()->where('category_id', $category->id)->exists()) {
+            return back()->withErrors(['category' => "{$category->name} is used by ledger entries, so it cannot be deleted."]);
+        }
+        $category->delete();
+
+        return back()->with('status', 'Category deleted.');
     }
 
     /**

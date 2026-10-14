@@ -15,12 +15,24 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'name', 'slug', 'address', 'city', 'country', 'phone', 'email',
     'latitude', 'longitude', 'elevation', 'timezone',
     'calculation_method', 'asr_method', 'high_latitude_rule',
-    'hijri_adjustment', 'imsak_minutes_before_fajr', 'currency', 'bank_details',
+    'hijri_adjustment', 'imsak_minutes_before_fajr', 'currency', 'bank_details', 'ramadan_image_path',
 ])]
 class Masjid extends Model
 {
     /** @use HasFactory<MasjidFactory> */
     use HasFactory;
+
+    /**
+     * Every new masjid starts with the default sehri and iftar duas (config/ramadan.php).
+     */
+    protected static function booted(): void
+    {
+        static::created(function (Masjid $masjid) {
+            foreach (config('ramadan.default_duas', []) as $i => $dua) {
+                $masjid->ramadanDuas()->create([...$dua, 'sort_order' => $i]);
+            }
+        });
+    }
 
     protected function casts(): array
     {
@@ -59,6 +71,11 @@ class Masjid extends Model
     public function ramadanCalendars(): HasMany
     {
         return $this->hasMany(RamadanCalendar::class);
+    }
+
+    public function ramadanDuas(): HasMany
+    {
+        return $this->hasMany(RamadanDua::class)->orderBy('sort_order')->orderBy('id');
     }
 
     public function funds(): HasMany

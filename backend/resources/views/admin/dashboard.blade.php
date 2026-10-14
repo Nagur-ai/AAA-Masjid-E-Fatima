@@ -111,7 +111,12 @@
                         <thead><tr><th>Prayer</th><th>Adhan</th><th>Iqamah</th></tr></thead>
                         <tbody>
                         @foreach (\App\Enums\Prayer::cases() as $p)
-                            <tr><td>{{ $p->label() }}</td><td>{{ $schedule->times[$p->value]?->format('H:i') }}</td><td>{{ $schedule->iqamah[$p->value]?->format('H:i') ?? '—' }}</td></tr>
+                            @php($isNext = $nextPrayer && $nextPrayer['prayer'] === $p->value)
+                            <tr @class(['next-row' => $isNext])>
+                                <td>{{ $p->label() }} @if ($isNext)<br><span class="next-tag">Next</span><br><span class="next-in">{{ $nextPrayer['at']->isSameDay($today) ? '' : 'tomorrow, ' }}in {{ $today->diff($nextPrayer['at'])->format('%hh %Im') }}</span>@endif</td>
+                                <td>{{ $schedule->times[$p->value]?->format('H:i') }}</td>
+                                <td>{{ $schedule->iqamah[$p->value]?->format('H:i') ?? '—' }}</td>
+                            </tr>
                         @endforeach
                         </tbody>
                     </table>

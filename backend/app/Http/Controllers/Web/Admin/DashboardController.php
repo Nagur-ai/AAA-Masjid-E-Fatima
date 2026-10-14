@@ -59,6 +59,9 @@ class DashboardController extends Controller
 
         if ($shows(Role::PANEL_PRAYERS)) {
             $data['schedule'] = $schedules->forDate($masjid, $today);
+            // After isha the next prayer is tomorrow's fajr.
+            $data['nextPrayer'] = $data['schedule']->nextPrayer($today)
+                ?? $schedules->forDate($masjid, $today->addDay())->nextPrayer($today);
         }
 
         if ($shows(Role::PANEL_RAMADAN)) {

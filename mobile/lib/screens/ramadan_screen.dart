@@ -181,54 +181,34 @@ class _DuaView extends StatelessWidget {
   }
 }
 
-/// Border colour for each prayer column (matches the website).
+/// Colours for the duas (match the website).
 const _prayerColors = {
   'sehri': Color(0xFF6D4BB3),
-  'fajr': Color(0xFF2F6FB5),
-  'dhuhr': Color(0xFFB8862B),
-  'asr': Color(0xFFC26A1B),
   'iftar': Color(0xFF0F6B4F),
-  'isha': Color(0xFF3B4A8F),
 };
-const _fridayColor = Color(0xFFD9A521);
+const _fridayGreen = Color(0xFF1B8A3A);
+const _otherRed = Color(0xFFC62828);
+const _headBlue = Color(0xFF1F3A8A);
 
-/// The Ramadan timetable as a table: each prayer in its own bordered column, Fridays highlighted.
+/// The Ramadan timetable like the masjid's printed one: No., date, day, sehri and iftar.
+/// Fridays are green and other days red.
 class _RamadanTable extends StatelessWidget {
   const _RamadanTable({required this.days, required this.todayStr});
 
   final List<RamadanDay> days;
   final String todayStr;
 
-  static const _columns = [
-    ('sehri', 'Sehri', 'సహరీ'),
-    ('fajr', 'Fajr', 'ఫజర్'),
-    ('dhuhr', 'Dhuhr', 'జుహర్'),
-    ('asr', 'Asr', 'అసర్'),
-    ('iftar', 'Iftar', 'ఇఫ్తార్'),
-    ('isha', 'Isha', 'ఇషా'),
-  ];
+  Widget _cell(String text, {TextStyle? style}) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+        child: Text(text, textAlign: TextAlign.center, style: style),
+      );
 
-  String? _time(RamadanDay d, String key) => switch (key) {
-        'sehri' => d.sehriEnds,
-        'iftar' => d.iftar,
-        _ => d.times[key],
-      };
-
-  Widget _cell(Widget child, {Color? border, Color? fill, bool top = false, bool bottom = false}) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: fill,
-          border: border == null
-              ? null
-              : Border(
-                  left: BorderSide(color: border, width: 2),
-                  right: BorderSide(color: border, width: 2),
-                  top: top ? BorderSide(color: border, width: 4) : BorderSide.none,
-                  bottom: bottom ? BorderSide(color: border, width: 2) : BorderSide.none,
-                ),
-        ),
-        child: child,
+  Widget _head(String te, String en) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+        child: Column(children: [
+          Text(te, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          Text(en, style: const TextStyle(color: Colors.white70, fontSize: 11)),
+        ]),
       );
 
   @override
@@ -237,84 +217,61 @@ class _RamadanTable extends StatelessWidget {
     final small = Theme.of(context).textTheme.bodySmall;
     final grid = BorderSide(color: scheme.outlineVariant);
 
-    TableRow header() => TableRow(children: [
-          _cell(const Text('Roza', style: TextStyle(fontWeight: FontWeight.bold))),
-          _cell(const Text('Date / వారం', style: TextStyle(fontWeight: FontWeight.bold))),
-          for (final (key, en, te) in _columns)
-            _cell(
-              Column(children: [
-                Text(en, style: TextStyle(fontWeight: FontWeight.bold, color: _prayerColors[key])),
-                Text(te, style: small?.copyWith(color: _prayerColors[key])),
-              ]),
-              border: _prayerColors[key],
-              fill: _prayerColors[key]!.withAlpha(41),
-              top: true,
-            ),
-        ]);
-
-    TableRow row(RamadanDay d, bool last) {
+    TableRow row(RamadanDay d) {
       final friday = d.weekday == 'Friday';
       final today = d.date == todayStr;
-      final rowFill = today
-          ? scheme.primaryContainer
-          : friday
-              ? _fridayColor.withAlpha(56)
-              : null;
-      final weight = friday || today ? FontWeight.bold : FontWeight.normal;
+      final color = friday ? _fridayGreen : _otherRed;
+      final base = TextStyle(color: color, fontWeight: friday ? FontWeight.bold : FontWeight.normal);
+      final time = base.copyWith(fontWeight: FontWeight.bold, fontFeatures: const [FontFeature.tabularFigures()]);
       return TableRow(
-        decoration: BoxDecoration(color: rowFill),
+        decoration: BoxDecoration(
+          color: today
+              ? Colors.amber.withAlpha(60)
+              : friday
+                  ? _fridayGreen.withAlpha(25)
+                  : null,
+        ),
         children: [
-          _cell(Text('${d.day}', style: const TextStyle(fontWeight: FontWeight.bold))),
-          _cell(Column(children: [
-            Text(DateFormat('EEE d MMM').format(DateTime.parse(d.date)), style: TextStyle(fontWeight: weight)),
-            if (d.weekdayTe != null) Text(d.weekdayTe!, style: small?.copyWith(fontWeight: weight)),
-            if (friday)
-              Container(
-                margin: const EdgeInsets.only(top: 2),
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                decoration: BoxDecoration(color: _fridayColor, borderRadius: BorderRadius.circular(8)),
-                child: const Text('Jumuah',
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black)),
-              ),
-            if (d.oddNightAfterIftar != null) Text('Night ${d.oddNightAfterIftar}', style: small),
-          ])),
-          for (final (key, _, _) in _columns)
-            _cell(
-              Text(_time(d, key) ?? '—',
-                  style: TextStyle(
-                    fontWeight: key == 'sehri' || key == 'iftar' || friday ? FontWeight.bold : FontWeight.normal,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  )),
-              border: _prayerColors[key],
-              fill: rowFill == null ? _prayerColors[key]!.withAlpha(18) : null,
-              bottom: last,
-            ),
+          _cell('${d.day}', style: base),
+          _cell(DateFormat('d-M-yy').format(DateTime.parse(d.date)), style: base),
+          _cell(d.weekdayTe ?? d.weekday, style: base),
+          _cell(d.sehriEnds ?? '—', style: time),
+          _cell(d.iftar ?? '—', style: time),
         ],
       );
     }
 
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
+    return Column(children: [
+      Container(
+        decoration: BoxDecoration(border: Border.all(color: _headBlue, width: 2)),
         child: Table(
-          defaultColumnWidth: const IntrinsicColumnWidth(),
+          columnWidths: const {0: FlexColumnWidth(.8), 1: FlexColumnWidth(1.4), 2: FlexColumnWidth(1.5)},
           defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          border: TableBorder(horizontalInside: grid, top: grid, bottom: grid, left: grid, right: grid),
+          border: TableBorder(horizontalInside: grid, verticalInside: grid),
           children: [
-            header(),
-            for (var i = 0; i < days.length; i++) row(days[i], i == days.length - 1),
+            TableRow(
+              decoration: const BoxDecoration(color: _headBlue),
+              children: [
+                _head('క్ర.సం', 'No.'),
+                _head('తారీఖ్', 'Date'),
+                _head('రోజ్', 'Day'),
+                _head('సహరీ', 'Sehri'),
+                _head('ఇఫ్తార్', 'Iftar'),
+              ],
+            ),
+            for (final d in days) row(d),
           ],
         ),
       ),
       const SizedBox(height: 6),
-      Row(children: [
-        Container(width: 12, height: 12, color: _fridayColor.withAlpha(128)),
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Container(width: 12, height: 12, color: _fridayGreen),
         const SizedBox(width: 4),
-        Text('Friday (Jumuah)', style: small),
+        Text('శుక్రవారం (Jumuah)', style: small),
         const SizedBox(width: 12),
-        Container(width: 12, height: 12, color: scheme.primaryContainer),
+        Container(width: 12, height: 12, color: _otherRed),
         const SizedBox(width: 4),
-        Text('Today', style: small),
+        Text('Other days', style: small),
       ]),
     ]);
   }

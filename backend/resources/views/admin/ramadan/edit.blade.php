@@ -22,6 +22,7 @@
     <form method="POST" action="{{ route('admin.ramadan.update', $hijriYear) }}" class="card">
         @csrf
         @method('PUT')
+        <h2>Calendar</h2>
         <div class="form-grid">
             <div class="field"><label for="starts_on">First day of Ramadan</label>
                 <input id="starts_on" name="starts_on" type="date" value="{{ old('starts_on', $calendar->starts_on->toDateString()) }}" required></div>
@@ -38,4 +39,55 @@
             <div class="field full"><button class="btn" type="submit">Save</button></div>
         </div>
     </form>
+
+    <div class="card" style="margin-top:16px">
+        <h2 lang="te">సహరీ & ఇఫ్తార్ దుఆలు <small class="muted">· Duas</small></h2>
+        <p class="muted">Shown above the Ramadan calendar on the website, the dashboard and the app. Sehri duas are purple, iftar duas green. Untick “Show” to hide a dua without deleting it.</p>
+
+        @forelse ($duas as $dua)
+            <div @class(['dua', 'dua-'.$dua->type, 'dua-hidden' => ! $dua->is_active]) style="margin-bottom:12px">
+                <div class="page-head" style="margin-bottom:0">
+                    <div lang="te">
+                        <strong class="dua-title">{{ $dua->title }}</strong>
+                        <span class="badge">{{ \App\Models\RamadanDua::TYPES[$dua->type] ?? $dua->type }}</span>
+                        @unless ($dua->is_active)<span class="badge cancelled">hidden</span>@endunless
+                    </div>
+                    <form method="POST" action="{{ route('admin.ramadan.duas.destroy', $dua) }}" class="inline" onsubmit="return confirm('Delete this dua?')">
+                        @csrf @method('DELETE')
+                        <button class="btn small danger" type="submit">Delete</button>
+                    </form>
+                </div>
+                <p class="dua-telugu" lang="te">{{ $dua->body }}</p>
+                <details>
+                    <summary>Edit</summary>
+                    @include('admin.ramadan._dua_form', ['dua' => $dua, 'action' => route('admin.ramadan.duas.update', $dua), 'method' => 'PUT'])
+                </details>
+            </div>
+        @empty
+            <p class="muted">No duas yet. Add one below.</p>
+        @endforelse
+
+        <h3>Add a dua</h3>
+        @include('admin.ramadan._dua_form', ['dua' => null, 'action' => route('admin.ramadan.duas.store'), 'method' => 'POST'])
+    </div>
+
+    <div class="card" style="margin-top:16px">
+        <h2>Printed timetable image</h2>
+        <p class="muted">Optional. Shown at the top of the Ramadan page, the dashboard and the app. JPG, PNG or WebP, up to 5 MB.</p>
+        @if ($currentMasjid->ramadan_image_path)
+            <a class="timetable-image" href="{{ route('masjid.ramadan.image', $currentMasjid) }}" target="_blank" rel="noopener" style="max-width:360px;margin:0 0 12px">
+                <img src="{{ route('masjid.ramadan.image', $currentMasjid) }}" alt="Current timetable image">
+            </a>
+            <form method="POST" action="{{ route('admin.ramadan.image.destroy') }}" class="inline" onsubmit="return confirm('Remove the timetable image?')">
+                @csrf @method('DELETE')
+                <button class="btn small danger" type="submit">Remove image</button>
+            </form>
+        @endif
+        <form method="POST" action="{{ route('admin.ramadan.image.store') }}" enctype="multipart/form-data" class="form-grid" style="margin-top:12px">
+            @csrf
+            <div class="field"><label for="image">{{ $currentMasjid->ramadan_image_path ? 'Replace image' : 'Upload image' }}</label>
+                <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp" required></div>
+            <div class="field full"><button class="btn secondary" type="submit">Upload</button></div>
+        </form>
+    </div>
 @endsection

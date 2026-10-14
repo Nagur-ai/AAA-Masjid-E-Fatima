@@ -108,7 +108,15 @@ footer { color: var(--muted); font-size: .85rem; padding: 24px 0; border-top: 1p
     background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
     padding: 14px; text-align: center;
 }
-.prayer.is-next { border-color: var(--primary); background: var(--primary-soft); }
+.prayer.is-next { position: relative; border: 2px solid var(--primary); background: var(--primary-soft);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 18%, transparent); }
+.prayer.is-next .adhan { color: var(--primary); }
+.next-tag { display: inline-block; padding: 1px 8px; border-radius: 999px; background: var(--primary); color: var(--primary-ink);
+    font-size: .72rem; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; vertical-align: middle; }
+.prayer .next-tag { position: absolute; top: -11px; left: 50%; transform: translateX(-50%); white-space: nowrap; box-shadow: 0 0 0 3px var(--bg); }
+.next-in { color: var(--primary); font-size: .85rem; font-weight: 600; }
+tr.next-row td { background: var(--primary-soft); font-weight: 700; color: var(--primary); }
+tr.next-row td:first-child { box-shadow: inset 4px 0 0 var(--primary); }
 .prayer .name { font-weight: 600; }
 .prayer .adhan { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .prayer .iqamah { color: var(--muted); font-size: .9rem; }
@@ -204,50 +212,39 @@ details summary { cursor: pointer; color: var(--primary); }
 
 /* Ramadan calendar and duas (dashboard + public Ramadan page) */
 :root {
-    --p-sehri: #6d4bb3; --p-fajr: #2f6fb5; --p-dhuhr: #b8862b;
-    --p-asr: #c26a1b; --p-iftar: #0f6b4f; --p-isha: #3b4a8f;
-    --friday: #fff1c7; --friday-edge: #d9a521;
+    --p-sehri: #6d4bb3; --p-iftar: #0f6b4f;
+    --ram-red: #c62828; --ram-green: #1b8a3a; --ram-green-soft: #e6f4ea; --ram-head: #1f3a8a;
 }
 @media (prefers-color-scheme: dark) {
     :root {
-        --p-sehri: #b39ae8; --p-fajr: #7fb2ea; --p-dhuhr: #e0b25a;
-        --p-asr: #ef9d5c; --p-iftar: #3fb488; --p-isha: #9aa6e8;
-        --friday: #3a3020; --friday-edge: #e0b25a;
+        --p-sehri: #b39ae8; --p-iftar: #3fb488;
+        --ram-red: #ff8a80; --ram-green: #69d38a; --ram-green-soft: #17301f; --ram-head: #2c4aa8;
     }
 }
 [lang="te"] { font-family: "Nirmala UI", "Noto Sans Telugu", "Gautami", "Ramabhadra", sans-serif; }
 
+/* Single table like the printed timetable: Fridays green, other days red */
+.ramadan-days { max-width: 760px; margin: 0 auto; border: 2px solid var(--ram-head); }
 .card .ramadan-days { max-height: 640px; overflow: auto; }
-.ramadan-table { border-collapse: collapse; }
-.ramadan-table th, .ramadan-table td { border: 1px solid var(--border); white-space: nowrap; }
-.ramadan-table thead th { position: sticky; top: 0; z-index: 1; background: var(--surface); }
-.ramadan-table th small { display: block; font-weight: 500; text-transform: none; letter-spacing: 0; }
-
-/* Each prayer column: its own coloured borders and a light tint */
-
-.ramadan-table .p-col { text-align: center; font-variant-numeric: tabular-nums;
-    border-left: 2px solid var(--pc); border-right: 2px solid var(--pc);
-    background: color-mix(in srgb, var(--pc) 7%, var(--surface)); }
-.ramadan-table thead .p-col { border-top: 4px solid var(--pc); color: var(--pc);
-    background: color-mix(in srgb, var(--pc) 16%, var(--surface)); }
-.ramadan-table tbody tr:last-child .p-col { border-bottom: 2px solid var(--pc); }
-.ramadan-table { --pc: var(--primary); }
-.ramadan-table .p-sehri { --pc: var(--p-sehri); } .ramadan-table .p-fajr { --pc: var(--p-fajr); }
-.ramadan-table .p-dhuhr { --pc: var(--p-dhuhr); } .ramadan-table .p-asr { --pc: var(--p-asr); }
-.ramadan-table .p-iftar { --pc: var(--p-iftar); } .ramadan-table .p-isha { --pc: var(--p-isha); }
-
-/* Fridays (Jumuah) and today */
-.ramadan-table tr.friday td { background: var(--friday); font-weight: 600; }
-.ramadan-table tr.friday td.p-col { background: color-mix(in srgb, var(--pc) 14%, var(--friday)); }
-.ramadan-table tr.friday td:first-child { box-shadow: inset 4px 0 0 var(--friday-edge); }
-.ramadan-table tr.today td { background: var(--primary-soft); }
-.ramadan-table tr.today td:first-child { box-shadow: inset 4px 0 0 var(--primary); }
-.badge.jumuah { background: var(--friday-edge); color: #1d2420; }
-.ramadan-legend { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 8px 0 0; font-size: .85rem; }
-.swatch { display: inline-block; width: 14px; height: 14px; border-radius: 3px; margin-left: 8px; }
+.ramadan-table { border-collapse: collapse; width: 100%; }
+.ramadan-table th, .ramadan-table td { border: 1px solid var(--border); text-align: center; padding: 7px 10px; }
+.ramadan-table thead th { position: sticky; top: 0; z-index: 1; background: var(--ram-head); color: #fff;
+    border-color: color-mix(in srgb, #fff 25%, var(--ram-head)); text-transform: none; letter-spacing: 0; }
+.ramadan-table thead th span { display: block; font-size: 1.05rem; font-weight: 700; }
+.ramadan-table thead th small { display: block; color: rgba(255,255,255,.8); font-size: .72rem; font-weight: 500; }
+.ramadan-table tbody tr { color: var(--ram-red); }
+.ramadan-table tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--ram-red) 4%, var(--surface)); }
+.ramadan-table td.time { font-weight: 700; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.ramadan-table tbody tr.friday { color: var(--ram-green); font-weight: 700; }
+.ramadan-table tbody tr.friday td { background: var(--ram-green-soft); }
+.ramadan-table tbody tr.today td { background: var(--warn-soft); border-top: 2px solid var(--accent); border-bottom: 2px solid var(--accent); }
+.ramadan-table tbody tr:hover td { background: color-mix(in srgb, var(--ram-head) 8%, var(--surface)); }
+.ramadan-legend { display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; margin: 8px 0 0; font-size: .85rem; color: var(--muted); }
+.swatch { display: inline-block; width: 14px; height: 14px; border-radius: 3px; margin-left: 10px; }
 .swatch:first-child { margin-left: 0; }
-.swatch.friday { background: var(--friday); border: 2px solid var(--friday-edge); }
-.swatch.today { background: var(--primary-soft); border: 2px solid var(--primary); }
+.swatch.friday { background: var(--ram-green); }
+.swatch.other { background: var(--ram-red); }
+.swatch.today { background: var(--warn-soft); border: 2px solid var(--accent); }
 
 /* Duas in Telugu */
 .duas { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
@@ -264,3 +261,16 @@ details summary { cursor: pointer; color: var(--primary); }
     .ramadan-days { max-height: none; overflow: visible; }
     .dua { break-inside: avoid; }
 }
+
+/* Masjid address in the footer, highlighted with a border */
+.address-box { display: flex; width: 100%; box-sizing: border-box; justify-content: center; text-align: center; flex-wrap: wrap; align-items: center; gap: 8px; font-style: normal; font-size: 1rem; font-weight: 600;
+    color: var(--primary); background: var(--primary-soft); border: 2px solid var(--primary); border-radius: var(--radius);
+    padding: 14px 16px; box-shadow: var(--shadow); font-size: 1.1rem; }
+.address-box svg { flex: none; }
+.dua-other { --pc: var(--accent); }
+.dua-hidden { opacity: .55; }
+
+/* Admin edit rows and list items */
+tr.edit-row td { padding-top: 0; border-top: 0; background: var(--surface); }
+tr.edit-row summary { font-size: .85rem; }
+.list-item { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; background: var(--surface); }

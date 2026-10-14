@@ -178,30 +178,17 @@ class RamadanCalendar {
         timetableImageUrl = j['timetable_image_url'];
 }
 
-/// A sehri or iftar dua with its Telugu transliteration and meaning.
+/// A dua shown with the Ramadan calendar, in Telugu (managed by the masjid admin).
 class Dua {
+  /// sehri, iftar or other (sets the colour).
   final String key;
-  final String title;
   final String titleTe;
-  final String arabic;
-  final String transliteration;
   final String telugu;
-  final String meaningTe;
-  final String meaningEn;
-  final String? noteTe;
-  final String? source;
 
   Dua.fromJson(Map<String, dynamic> j)
       : key = j['key'],
-        title = j['title'],
         titleTe = j['title_te'],
-        arabic = j['arabic'],
-        transliteration = j['transliteration'],
-        telugu = j['telugu'],
-        meaningTe = j['meaning_te'],
-        meaningEn = j['meaning_en'],
-        noteTe = j['note_te'],
-        source = j['source'];
+        telugu = j['telugu'];
 }
 
 class Fund {

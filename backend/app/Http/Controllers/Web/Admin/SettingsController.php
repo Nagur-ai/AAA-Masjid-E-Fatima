@@ -47,6 +47,14 @@ class SettingsController extends Controller
         return back()->with('status', 'Iqamah rule added.');
     }
 
+    public function updateIqamah(StoreIqamahRuleRequest $request, IqamahRule $rule): RedirectResponse
+    {
+        $this->ensureOwned($rule);
+        $rule->update($request->validated());
+
+        return back()->with('status', 'Iqamah rule updated.');
+    }
+
     public function destroyIqamah(IqamahRule $rule): RedirectResponse
     {
         $this->ensureOwned($rule);
@@ -57,16 +65,19 @@ class SettingsController extends Controller
 
     public function storeJumuah(Request $request): RedirectResponse
     {
-        $data = $request->validate([
-            'label' => ['required', 'string', 'max:60'],
-            'khutbah_time' => ['required', 'date_format:H:i'],
-            'iqamah_time' => ['required', 'date_format:H:i', 'after:khutbah_time'],
-            'language' => ['nullable', 'string', 'max:32'],
-        ]);
+        $data = $this->validateJumuah($request);
         $masjid = $this->masjid();
         $masjid->jumuahSessions()->create([...$data, 'sort_order' => $masjid->jumuahSessions()->count()]);
 
         return back()->with('status', 'Jumuah session added.');
+    }
+
+    public function updateJumuah(Request $request, JumuahSession $session): RedirectResponse
+    {
+        $this->ensureOwned($session);
+        $session->update($this->validateJumuah($request));
+
+        return back()->with('status', 'Jumuah session updated.');
     }
 
     public function destroyJumuah(JumuahSession $session): RedirectResponse
@@ -75,5 +86,15 @@ class SettingsController extends Controller
         $session->delete();
 
         return back()->with('status', 'Jumuah session removed.');
+    }
+
+    private function validateJumuah(Request $request): array
+    {
+        return $request->validate([
+            'label' => ['required', 'string', 'max:60'],
+            'khutbah_time' => ['required', 'date_format:H:i'],
+            'iqamah_time' => ['required', 'date_format:H:i', 'after:khutbah_time'],
+            'language' => ['nullable', 'string', 'max:32'],
+        ]);
     }
 }

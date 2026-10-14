@@ -219,13 +219,33 @@ class _PrayerRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
     return Card(
-      elevation: 0,
+      elevation: highlighted ? 3 : 0,
       color: highlighted ? scheme.primaryContainer : scheme.surfaceContainerHighest,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: highlighted ? BorderSide(color: scheme.primary, width: 2) : BorderSide.none,
+      ),
       child: ListTile(
-        title: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+        title: Row(children: [
+          Text(label, style: TextStyle(fontWeight: highlighted ? FontWeight.bold : FontWeight.w600)),
+          if (highlighted) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(color: scheme.primary, borderRadius: BorderRadius.circular(999)),
+              child: Text('NEXT',
+                  style: TextStyle(color: scheme.onPrimary, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: .5)),
+            ),
+          ],
+        ]),
         subtitle: iqamah != null ? Text('Iqamah $iqamah') : null,
-        trailing: Text(adhan ?? '—', style: Theme.of(context).textTheme.titleLarge),
+        trailing: Text(adhan ?? '—',
+            style: text.titleLarge?.copyWith(
+              fontWeight: highlighted ? FontWeight.bold : null,
+              color: highlighted ? scheme.primary : null,
+            )),
       ),
     );
   }

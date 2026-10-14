@@ -11,7 +11,9 @@ use App\Services\Ramadan\RamadanCalendarService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PublicController extends Controller
 {
@@ -63,6 +65,16 @@ class PublicController extends Controller
             'calendar' => $ramadan->build($masjid, $hijriYear),
             'today' => CarbonImmutable::now($masjid->timezone)->toDateString(),
         ]);
+    }
+
+    /**
+     * The masjid's printed Ramadan timetable, uploaded by the admin.
+     */
+    public function ramadanImage(Masjid $masjid): StreamedResponse
+    {
+        abort_unless($masjid->ramadan_image_path && Storage::exists($masjid->ramadan_image_path), 404);
+
+        return Storage::response($masjid->ramadan_image_path, null, ['Cache-Control' => 'public, max-age=300']);
     }
 
     public function donateForm(Masjid $masjid): View
