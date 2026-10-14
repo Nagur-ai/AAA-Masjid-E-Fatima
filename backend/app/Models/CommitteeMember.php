@@ -52,13 +52,6 @@ class CommitteeMember extends Model
         return __(self::ROLES[$this->role] ?? self::ROLES['member']);
     }
 
-    /**
-     * Extra detail shown under the role, e.g. "Advisor" on a member; null for "other" (it is the role).
-     */
-    public function subtitle(): ?string
-    {
-        return $this->role !== 'other' && $this->title ? $this->title : null;
-    }
 
     public function roleRank(): int
     {

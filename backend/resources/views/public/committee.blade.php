@@ -30,7 +30,6 @@
                         <td class="name">{{ $m->name }}</td>
                         <td>
                             <span class="role-badge">{{ $m->roleLabel() }}</span>
-                            @if ($m->subtitle())<small class="role-sub">{{ $m->subtitle() }}</small>@endif
                         </td>
                         <td>
                             @if ($m->show_phone && $m->phone)

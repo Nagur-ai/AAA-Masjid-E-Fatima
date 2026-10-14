@@ -364,10 +364,13 @@ tr.edit-row summary { font-size: .85rem; }
 [dir="rtl"] .si-time, [dir="rtl"] .time-chip, [dir="rtl"] .adhan { direction: ltr; unicode-bidi: isolate; }
 
 /* Committee table (public and admin) */
-.committee-table { max-width: 900px; }
-.committee-table th { background: #1b2a4a; color: #fff; border-bottom: 3px solid #f3c969; }
-.committee-table td { vertical-align: middle; }
-.committee-table td.num { font-weight: 800; color: var(--muted); width: 3em; }
+.committee-table table { border-collapse: collapse; width: 100%; }
+.committee-table th, .committee-table td { border: 1px solid var(--border); padding: 12px 16px; vertical-align: middle; }
+.committee-table th { background: #1b2a4a; color: #fff; border-color: #2c3d63; border-bottom: 3px solid #f3c969; font-size: .85rem; letter-spacing: .03em; }
+.committee-table th.num, .committee-table td.num { width: 70px; text-align: center; }
+.committee-table td.num { font-weight: 800; color: var(--muted); }
+.committee-table tbody tr:nth-child(even):not(.bearer) td { background: color-mix(in srgb, var(--primary) 3%, var(--surface)); }
+.committee-table tbody tr:hover td { background: color-mix(in srgb, var(--primary) 7%, var(--surface)); }
 .committee-table tr.bearer td { background: color-mix(in srgb, var(--primary) 5%, var(--surface)); }
 .committee-table tr.role-mutawalli td, .committee-table tr.role-president td { background: color-mix(in srgb, #f3c969 16%, var(--surface)); }
 .committee-table tr.role-mutawalli td:first-child, .committee-table tr.role-president td:first-child { box-shadow: inset 4px 0 0 #d9a521; }
@@ -376,7 +379,6 @@ tr.edit-row summary { font-size: .85rem; }
 .committee-table td.name { font-weight: 700; }
 .committee-table .photo { width: 56px; padding-top: 6px; padding-bottom: 6px; }
 .committee-table .photo .avatar { width: 44px; height: 44px; border-width: 2px; display: block; }
-.role-sub { display: block; margin-top: 3px; color: var(--muted); font-size: .8rem; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
 .role-badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-weight: 700; font-size: .85rem;
     color: var(--primary); background: var(--primary-soft); }

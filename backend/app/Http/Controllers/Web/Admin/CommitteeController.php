@@ -74,6 +74,10 @@ class CommitteeController extends Controller
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
         unset($data['photo'], $data['sort_order']);
+        // The title names an "Other" role (e.g. Imam); other roles show their own name.
+        if ($data['role'] !== 'other') {
+            $data['title'] = null;
+        }
 
         return $data;
     }

@@ -24,7 +24,6 @@
                     <td class="name">{{ $m->name }}</td>
                     <td>
                         <span class="role-badge">{{ $m->role === 'other' && $m->title ? $m->title : $roles[$m->role] }}</span>
-                        @if ($m->role !== 'other' && $m->title)<small class="role-sub">{{ $m->title }}</small>@endif
                     </td>
                     <td>{{ $m->phone ?: '—' }}@if ($m->phone)<br><small class="muted">{{ $m->show_phone ? 'shown publicly' : 'not shown' }}</small>@endif</td>
                     <td><span class="badge {{ $m->is_active ? 'completed' : 'cancelled' }}">{{ $m->is_active ? 'shown' : 'hidden' }}</span></td>
