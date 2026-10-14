@@ -10,7 +10,7 @@
 @endphp
 <div class="clock" data-tz="{{ $tz }}" title="Local time at {{ $clockMasjid?->name ?? config('app.name') }} ({{ $tz }})">
     <time class="clock-time" datetime="{{ $now->toIso8601String() }}">{{ $now->format('H:i:s') }}</time>
-    <span class="clock-date">{{ $now->format('D j M') }}@if($hijri) &middot; {{ $hijri }}@endif</span>
+    <span class="clock-date">{{ $now->translatedFormat('D j M') }}@if($hijri) &middot; {{ $hijri }}@endif</span>
 </div>
 <script>
     (function () {

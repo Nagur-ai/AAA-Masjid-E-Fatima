@@ -4,6 +4,7 @@ namespace App\Services\Ramadan;
 
 use App\Models\Masjid;
 use App\Models\RamadanCalendar;
+use App\Models\RamadanDayTime;
 use App\Services\Hijri\HijriCalendar;
 use App\Services\PrayerTimes\DailySchedule;
 use App\Services\PrayerTimes\PrayerScheduleService;
@@ -56,21 +57,37 @@ class RamadanCalendarService
         $start = CarbonImmutable::parse($calendar->starts_on->toDateString(), $masjid->timezone);
         $end = $start->addDays($calendar->total_days - 1);
 
-        $days = array_map(function (DailySchedule $s) use ($start) {
+        $custom = $this->customTimes($masjid, $hijriYear);
+
+        $days = array_map(function (DailySchedule $s) use ($start, $custom, $masjid) {
             $number = (int) $start->diffInDays($s->date) + 1;
             // The Islamic night begins at maghrib, so night N+1 follows iftar on day N.
             $nightNumber = $number + 1;
             $daily = $s->toArray();
+            $set = $custom[$number] ?? null;
+            $sehri = $set?->sehri ? substr($set->sehri, 0, 5) : null;
+            $iftar = $set?->iftar ? substr($set->iftar, 0, 5) : null;
+            // The admin may also move the day to another date and name the day by hand.
+            $date = $set?->date ? CarbonImmutable::parse($set->date->toDateString(), $masjid->timezone) : $s->date;
 
             return [
                 'day' => $number,
-                'date' => $daily['date'],
-                'weekday' => $daily['weekday'],
-                'weekday_te' => $daily['weekday_te'],
+                'ashra' => min(3, intdiv($number - 1, 10) + 1),
+                'date' => $date->toDateString(),
+                'weekday' => $date->format('l'),
+                'weekday_te' => $set?->day_label ?: $date->locale('te')->dayName,
+                'date_calculated' => $daily['date'],
+                'weekday_te_calculated' => $daily['weekday_te'],
+                'date_custom' => (bool) $set?->date,
+                'day_label_custom' => (bool) $set?->day_label,
                 'hijri' => $daily['hijri'],
-                'sehri_ends' => $daily['times']['fajr'],
-                'imsak' => $daily['times']['imsak'],
-                'iftar' => $daily['times']['maghrib'],
+                'sehri_ends' => $sehri ?? $daily['times']['fajr'],
+                'imsak' => $sehri ? $this->imsakBefore($sehri, $masjid) : $daily['times']['imsak'],
+                'iftar' => $iftar ?? $daily['times']['maghrib'],
+                'sehri_calculated' => $daily['times']['fajr'],
+                'iftar_calculated' => $daily['times']['maghrib'],
+                'sehri_custom' => $sehri !== null,
+                'iftar_custom' => $iftar !== null,
                 'times' => $daily['times'],
                 'iqamah' => $daily['iqamah'],
                 'is_last_ten' => $number >= 21,
@@ -94,5 +111,36 @@ class RamadanCalendarService
             'duas' => $masjid->ramadanDuas()->where('is_active', true)->get()->map->toPublicArray()->all(),
             'timetable_image_url' => $masjid->ramadan_image_path ? route('masjid.ramadan.image', $masjid) : null,
         ];
+    }
+
+    /**
+     * Today's roza number with its sehri, iftar and imsak (the admin's times where set),
+     * or null outside Ramadan.
+     *
+     * @return array{day: int, sehri: string|null, iftar: string|null, imsak: string|null}|null
+     */
+    public function today(Masjid $masjid, DailySchedule $schedule): ?array
+    {
+        $year = $this->upcomingYear($masjid, $schedule->date);
+        $day = collect($this->build($masjid, $year)['days'])->firstWhere('date', $schedule->date->toDateString());
+
+        return $day ? ['day' => $day['day'], 'sehri' => $day['sehri_ends'], 'iftar' => $day['iftar'], 'imsak' => $day['imsak']] : null;
+    }
+
+    /**
+     * @return array<int, RamadanDayTime> keyed by roza number
+     */
+    private function customTimes(Masjid $masjid, int $hijriYear): array
+    {
+        if (! $masjid->exists) {
+            return [];
+        }
+
+        return $masjid->ramadanDayTimes()->where('hijri_year', $hijriYear)->get()->keyBy('day')->all();
+    }
+
+    private function imsakBefore(string $sehri, Masjid $masjid): string
+    {
+        return CarbonImmutable::createFromFormat('H:i', $sehri)->subMinutes($masjid->imsak_minutes_before_fajr ?? 10)->format('H:i');
     }
 }

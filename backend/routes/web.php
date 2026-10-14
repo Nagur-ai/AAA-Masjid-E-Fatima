@@ -8,11 +8,17 @@ use Illuminate\Support\Facades\Route;
 
 // Public site
 Route::get('/', [PublicController::class, 'home'])->name('home');
-Route::prefix('m/{masjid}')->name('masjid.')->group(function () {
+// Links from before the move to /msd/ keep working.
+Route::get('m/{path}', fn (string $path) => redirect('/msd/'.$path, 301))->where('path', '.*');
+
+Route::prefix('msd/{masjid}')->name('masjid.')->group(function () {
     Route::get('/', [PublicController::class, 'show'])->name('show');
     Route::get('timetable', [PublicController::class, 'timetable'])->name('timetable');
     Route::get('ramadan/{hijriYear?}', [PublicController::class, 'ramadan'])->whereNumber('hijriYear')->name('ramadan');
     Route::get('ramadan-image', [PublicController::class, 'ramadanImage'])->name('ramadan.image');
+    Route::get('banner', [PublicController::class, 'banner'])->name('banner');
+    Route::get('committee', [PublicController::class, 'committee'])->name('committee');
+    Route::get('committee/{member}/photo', [PublicController::class, 'committeePhoto'])->name('committee.photo');
     Route::get('donate', [PublicController::class, 'donateForm'])->name('donate');
     Route::post('donate', [PublicController::class, 'donate'])->middleware('throttle:donations');
 });
@@ -62,6 +68,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'staff'])->group(fun
     Route::middleware('staff:admin')->group(function () {
         Route::get('settings', [Admin\SettingsController::class, 'edit'])->name('settings.edit');
         Route::put('settings', [Admin\SettingsController::class, 'update'])->name('settings.update');
+        Route::post('settings/banner', [Admin\SettingsController::class, 'storeBanner'])->name('settings.banner.store');
+        Route::delete('settings/banner', [Admin\SettingsController::class, 'destroyBanner'])->name('settings.banner.destroy');
         Route::post('settings/iqamah', [Admin\SettingsController::class, 'storeIqamah'])->name('settings.iqamah.store');
         Route::put('settings/iqamah/{rule}', [Admin\SettingsController::class, 'updateIqamah'])->name('settings.iqamah.update');
         Route::delete('settings/iqamah/{rule}', [Admin\SettingsController::class, 'destroyIqamah'])->name('settings.iqamah.destroy');
@@ -69,13 +77,24 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'staff'])->group(fun
         Route::put('settings/jumuah/{session}', [Admin\SettingsController::class, 'updateJumuah'])->name('settings.jumuah.update');
         Route::delete('settings/jumuah/{session}', [Admin\SettingsController::class, 'destroyJumuah'])->name('settings.jumuah.destroy');
 
+        Route::get('prayer-times', [Admin\PrayerTimeController::class, 'edit'])->name('prayer-times.edit');
+        Route::put('prayer-times', [Admin\PrayerTimeController::class, 'update'])->name('prayer-times.update');
+        Route::delete('prayer-times', [Admin\PrayerTimeController::class, 'reset'])->name('prayer-times.reset');
+
         Route::get('ramadan/{hijriYear?}', [Admin\RamadanController::class, 'edit'])->whereNumber('hijriYear')->name('ramadan.edit');
         Route::put('ramadan/{hijriYear}', [Admin\RamadanController::class, 'update'])->whereNumber('hijriYear')->name('ramadan.update');
+        Route::put('ramadan/{hijriYear}/days', [Admin\RamadanController::class, 'updateDays'])->whereNumber('hijriYear')->name('ramadan.days.update');
+        Route::delete('ramadan/{hijriYear}/days', [Admin\RamadanController::class, 'resetDays'])->whereNumber('hijriYear')->name('ramadan.days.reset');
         Route::post('ramadan/duas', [Admin\RamadanController::class, 'storeDua'])->name('ramadan.duas.store');
         Route::put('ramadan/duas/{dua}', [Admin\RamadanController::class, 'updateDua'])->name('ramadan.duas.update');
         Route::delete('ramadan/duas/{dua}', [Admin\RamadanController::class, 'destroyDua'])->name('ramadan.duas.destroy');
         Route::post('ramadan/image', [Admin\RamadanController::class, 'storeImage'])->name('ramadan.image.store');
         Route::delete('ramadan/image', [Admin\RamadanController::class, 'destroyImage'])->name('ramadan.image.destroy');
+
+        Route::get('committee', [Admin\CommitteeController::class, 'index'])->name('committee.index');
+        Route::post('committee', [Admin\CommitteeController::class, 'store'])->name('committee.store');
+        Route::put('committee/{member}', [Admin\CommitteeController::class, 'update'])->name('committee.update');
+        Route::delete('committee/{member}', [Admin\CommitteeController::class, 'destroy'])->name('committee.destroy');
 
         Route::get('users', [Admin\UserController::class, 'index'])->name('users.index');
         Route::post('users', [Admin\UserController::class, 'store'])->name('users.store');

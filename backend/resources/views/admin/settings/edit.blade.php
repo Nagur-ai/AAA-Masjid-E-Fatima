@@ -5,6 +5,34 @@
 @section('content')
     <div class="page-head"><h1>Masjid settings</h1></div>
 
+    <div class="card" style="margin-bottom:16px">
+        <h2>Banner photo</h2>
+        <p class="muted">A photo of the masjid, shown behind its name and today's date on the public home page. Crop out phone buttons and people before uploading. JPG, PNG or WebP, up to 5 MB.</p>
+        @if ($masjid->banner_image_path)
+            <div class="hero hero-photo banner-preview" style="background-image: linear-gradient(180deg, rgba(8, 48, 36, .30), rgba(8, 48, 36, .85)), url('{{ route('masjid.banner', $masjid) }}'); background-position: center {{ $masjid->banner_position }};">
+                <h1 style="margin:0">{{ $masjid->name }}</h1>
+                <div class="muted">Preview</div>
+            </div>
+            <form method="POST" action="{{ route('admin.settings.banner.destroy') }}" class="inline" onsubmit="return confirm('Remove the banner photo?')">
+                @csrf @method('DELETE')
+                <button class="btn small danger" type="submit">Remove photo</button>
+            </form>
+        @endif
+        <form method="POST" action="{{ route('admin.settings.banner.store') }}" enctype="multipart/form-data" class="form-grid" style="margin-top:12px">
+            @csrf
+            <div class="field"><label for="banner">{{ $masjid->banner_image_path ? 'Replace photo' : 'Upload photo' }}</label>
+                <input id="banner" name="banner" type="file" accept="image/jpeg,image/png,image/webp" @required(! $masjid->banner_image_path)></div>
+            <div class="field"><label for="banner_position">Part of the photo to show</label>
+                <select id="banner_position" name="banner_position">
+                    @foreach (['top' => 'Top (e.g. the minaret)', 'center' => 'Middle', 'bottom' => 'Bottom (e.g. the entrance)'] as $v => $l)
+                        <option value="{{ $v }}" @selected($masjid->banner_position === $v)>{{ $l }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="field full"><button class="btn secondary" type="submit">Save banner</button></div>
+        </form>
+    </div>
+
     <form method="POST" action="{{ route('admin.settings.update') }}" class="card" style="margin-bottom:16px">
         @csrf
         @method('PUT')
@@ -70,7 +98,8 @@
     <div class="grid grid-2">
         <div class="card">
             <h2>Iqamah times</h2>
-            <p class="muted">The newest rule in effect for a date wins. Add a new rule with a start date for seasonal changes.</p>
+            <p class="muted">The newest rule in effect for a date wins. Add a new rule with a start date for seasonal changes.
+                To change the adhan or iqamah of a single day, use <a href="{{ route('admin.prayer-times.edit') }}">Prayer times for a day</a>.</p>
             <div class="table-wrap" style="margin-bottom:12px">
                 <table>
                     <thead><tr><th>Prayer</th><th>Rule</th><th>From</th><th>To</th><th></th></tr></thead>

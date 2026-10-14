@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PledgeDonationRequest;
+use App\Models\CommitteeMember;
 use App\Models\Masjid;
 use App\Services\Finance\DonationService;
 use App\Services\PrayerTimes\PrayerScheduleService;
@@ -26,7 +27,7 @@ class PublicController extends Controller
             : view('public.home', ['masjids' => $masjids]);
     }
 
-    public function show(Masjid $masjid, PrayerScheduleService $schedules): View
+    public function show(Masjid $masjid, PrayerScheduleService $schedules, RamadanCalendarService $ramadan): View
     {
         $now = CarbonImmutable::now($masjid->timezone);
         $today = $schedules->forDate($masjid, $now);
@@ -37,6 +38,7 @@ class PublicController extends Controller
             'today' => $today,
             'next' => $next,
             'now' => $now,
+            'ramadanToday' => $ramadan->today($masjid, $today),
         ]);
     }
 
@@ -75,6 +77,31 @@ class PublicController extends Controller
         abort_unless($masjid->ramadan_image_path && Storage::exists($masjid->ramadan_image_path), 404);
 
         return Storage::response($masjid->ramadan_image_path, null, ['Cache-Control' => 'public, max-age=300']);
+    }
+
+    /**
+     * The masjid photo behind its name on the home page, uploaded by the admin.
+     */
+    public function banner(Masjid $masjid): StreamedResponse
+    {
+        abort_unless($masjid->banner_image_path && Storage::exists($masjid->banner_image_path), 404);
+
+        return Storage::response($masjid->banner_image_path, null, ['Cache-Control' => 'public, max-age=3600']);
+    }
+
+    public function committee(Masjid $masjid): View
+    {
+        $members = $masjid->committeeMembers()->where('is_active', true)->get()
+            ->sortBy(fn (CommitteeMember $m) => [$m->roleRank(), $m->sort_order, $m->id])->values();
+
+        return view('public.committee', ['masjid' => $masjid, 'members' => $members]);
+    }
+
+    public function committeePhoto(Masjid $masjid, CommitteeMember $member): StreamedResponse
+    {
+        abort_unless($member->masjid_id === $masjid->id && $member->is_active && $member->photo_path && Storage::exists($member->photo_path), 404);
+
+        return Storage::response($member->photo_path, null, ['Cache-Control' => 'public, max-age=3600']);
     }
 
     public function donateForm(Masjid $masjid): View

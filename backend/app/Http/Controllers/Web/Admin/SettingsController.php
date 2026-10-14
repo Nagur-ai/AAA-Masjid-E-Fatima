@@ -13,6 +13,8 @@ use App\Models\IqamahRule;
 use App\Models\JumuahSession;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class SettingsController extends Controller
@@ -96,5 +98,42 @@ class SettingsController extends Controller
             'iqamah_time' => ['required', 'date_format:H:i', 'after:khutbah_time'],
             'language' => ['nullable', 'string', 'max:32'],
         ]);
+    }
+
+    /**
+     * Upload (or replace) the photo behind the masjid name on the public home page,
+     * or just change which part of it is shown.
+     */
+    public function storeBanner(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'banner' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'banner_position' => ['required', Rule::in(['top', 'center', 'bottom'])],
+        ]);
+        $masjid = $this->masjid();
+        $masjid->banner_position = $request->input('banner_position');
+
+        if ($request->hasFile('banner')) {
+            $old = $masjid->banner_image_path;
+            $masjid->banner_image_path = $request->file('banner')->store('banners');
+            if ($old) {
+                Storage::delete($old);
+            }
+        }
+        $masjid->save();
+
+        return back()->with('status', 'Banner photo saved.');
+    }
+
+    public function destroyBanner(): RedirectResponse
+    {
+        $masjid = $this->masjid();
+        if ($masjid->banner_image_path) {
+            Storage::delete($masjid->banner_image_path);
+            $masjid->banner_image_path = null;
+            $masjid->save();
+        }
+
+        return back()->with('status', 'Banner photo removed.');
     }
 }

@@ -59,6 +59,8 @@ class DashboardController extends Controller
 
         if ($shows(Role::PANEL_PRAYERS)) {
             $data['schedule'] = $schedules->forDate($masjid, $today);
+            $data['editedPrayers'] = $masjid->prayerTimeOverrides()->whereDate('date', $today->toDateString())
+                ->get()->map(fn ($o) => $o->prayer->value)->all();
             // After isha the next prayer is tomorrow's fajr.
             $data['nextPrayer'] = $data['schedule']->nextPrayer($today)
                 ?? $schedules->forDate($masjid, $today->addDay())->nextPrayer($today);

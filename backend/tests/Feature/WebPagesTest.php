@@ -22,10 +22,10 @@ class WebPagesTest extends TestCase
 
     public function test_public_pages_render(): void
     {
-        $this->get('/')->assertRedirect('/m/masjid-e-fatima');
+        $this->get('/')->assertRedirect('/msd/klr');
 
-        foreach (['/m/masjid-e-fatima', '/m/masjid-e-fatima/timetable', '/m/masjid-e-fatima/timetable?month=2027-02', '/m/masjid-e-fatima/ramadan', '/m/masjid-e-fatima/ramadan/1448', '/m/masjid-e-fatima/donate'] as $url) {
-            $this->get($url)->assertOk()->assertSee('Masjid-e-Fatima');
+        foreach (['/msd/klr', '/msd/klr/timetable', '/msd/klr/timetable?month=2027-02', '/msd/klr/ramadan', '/msd/klr/ramadan/1448', '/msd/klr/donate'] as $url) {
+            $this->get($url)->assertOk()->assertSee('Masjid-A-Fatima');
         }
     }
 
@@ -33,11 +33,11 @@ class WebPagesTest extends TestCase
     {
         $fund = Masjid::first()->funds()->first();
 
-        $this->post('/m/masjid-e-fatima/donate', [
+        $this->post('/msd/klr/donate', [
             'fund_id' => $fund->id, 'amount' => 500, 'payment_method' => 'upi', 'donor_name' => 'Yusuf', 'donor_phone' => '9999999999',
-        ])->assertRedirect('/m/masjid-e-fatima/donate');
+        ])->assertRedirect('/msd/klr/donate');
 
-        $this->followingRedirects()->get('/m/masjid-e-fatima/donate')->assertOk();
+        $this->followingRedirects()->get('/msd/klr/donate')->assertOk();
         $this->assertDatabaseHas('donations', ['donor_name' => 'Yusuf', 'status' => 'pending']);
     }
 

@@ -19,7 +19,7 @@ Start the backend (`php artisan serve` in `../backend`), then:
 flutter run
 
 # Physical device or production server
-flutter run --dart-define=API_BASE_URL=https://masjid.example.org/api/v1 --dart-define=MASJID_SLUG=masjid-e-fatima
+flutter run --dart-define=API_BASE_URL=https://masjid.example.org/api/v1 --dart-define=MASJID_SLUG=klr
 ```
 
 For plain-HTTP local development on Android, allow cleartext traffic in `android/app/src/main/AndroidManifest.xml` (`android:usesCleartextTraffic="true"` on `<application>`). Use HTTPS in production.

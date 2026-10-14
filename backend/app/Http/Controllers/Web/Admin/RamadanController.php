@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Web\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateRamadanRequest;
+use App\Models\RamadanDayTime;
 use App\Models\RamadanDua;
 use App\Services\Ramadan\RamadanCalendarService;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -25,6 +27,7 @@ class RamadanController extends Controller
         return view('admin.ramadan.edit', [
             'hijriYear' => $hijriYear,
             'calendar' => $this->ramadan->calendarFor($masjid, $hijriYear),
+            'timetable' => $this->ramadan->build($masjid, $hijriYear),
             'duas' => $masjid->ramadanDuas()->get(),
             'duaTypes' => RamadanDua::TYPES,
         ]);
@@ -38,6 +41,58 @@ class RamadanController extends Controller
         );
 
         return back()->with('status', "Ramadan {$hijriYear} calendar saved.");
+    }
+
+    /**
+     * Save each day's date, Telugu day name and sehri/iftar times. A value equal to the
+     * calculated one (or left empty) is not stored, so that field keeps following the calculation.
+     */
+    public function updateDays(Request $request, int $hijriYear): RedirectResponse
+    {
+        abort_unless($hijriYear >= 1400 && $hijriYear <= 1600, 404);
+        $request->validate([
+            'date' => ['array'], 'date.*' => ['nullable', 'date_format:Y-m-d'],
+            'day_label' => ['array'],
+            'day_label.*' => ['nullable', Rule::in([...RamadanDayTime::DAY_NAMES, ...RamadanDayTime::DAY_NAMES_SHORT])],
+            'sehri' => ['array'], 'sehri.*' => ['nullable', 'date_format:H:i'],
+            'iftar' => ['array'], 'iftar.*' => ['nullable', 'date_format:H:i'],
+        ]);
+        $masjid = $this->masjid();
+
+        foreach ($this->ramadan->build($masjid, $hijriYear)['days'] as $d) {
+            $n = $d['day'];
+            $date = $request->input("date.{$n}");
+            $date = ($date && $date !== $d['date_calculated']) ? $date : null;
+            // A day name equal to the weekday of the (new) date is automatic, so not stored.
+            $label = trim((string) $request->input("day_label.{$n}"));
+            $autoLabel = CarbonImmutable::parse($date ?? $d['date_calculated'])->locale('te')->dayName;
+            $label = ($label !== '' && $label !== $autoLabel) ? $label : null;
+            $sehri = $request->input("sehri.{$n}");
+            $sehri = ($sehri && $sehri !== $d['sehri_calculated']) ? $sehri : null;
+            $iftar = $request->input("iftar.{$n}");
+            $iftar = ($iftar && $iftar !== $d['iftar_calculated']) ? $iftar : null;
+
+            $key = ['hijri_year' => $hijriYear, 'day' => $n];
+            if ($date === null && $label === null && $sehri === null && $iftar === null) {
+                $masjid->ramadanDayTimes()->where($key)->delete();
+            } else {
+                $masjid->ramadanDayTimes()->updateOrCreate($key, ['date' => $date, 'day_label' => $label, 'sehri' => $sehri, 'iftar' => $iftar]);
+            }
+        }
+
+        return redirect()->to(route('admin.ramadan.edit', $hijriYear).'#timetable')
+            ->with('status', "Ramadan {$hijriYear} timetable saved.");
+    }
+
+    /**
+     * Go back to the calculated sehri/iftar times for every day.
+     */
+    public function resetDays(int $hijriYear): RedirectResponse
+    {
+        $this->masjid()->ramadanDayTimes()->where('hijri_year', $hijriYear)->delete();
+
+        return redirect()->to(route('admin.ramadan.edit', $hijriYear).'#timetable')
+            ->with('status', 'All days now use the calculated sehri and iftar times.');
     }
 
     public function storeDua(Request $request): RedirectResponse

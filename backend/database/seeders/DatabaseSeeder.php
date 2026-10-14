@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
     {
         $masjid = $provision([
             'name' => 'Masjid-A-Fatima',
-            'slug' => 'al-noor',
+            'slug' => 'klr',
             'address' => 'మస్జిద్-ఎ-ఫాతిమా, కల్లూరు గ్రామం, కురిచేడు మండలం',
             'city' => 'ప్రకాశం జిల్లా - 523304',
             'country' => 'IN',

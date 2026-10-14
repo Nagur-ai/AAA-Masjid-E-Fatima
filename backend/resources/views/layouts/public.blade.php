@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ in_array(app()->getLocale(), config('locales.rtl'), true) ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,23 +17,30 @@
         @endisset
         <nav class="nav">
             @isset($masjid)
-                <a href="{{ route('masjid.show', $masjid) }}" @class(['active' => request()->routeIs('masjid.show')])>Today</a>
-                <a href="{{ route('masjid.timetable', $masjid) }}" @class(['active' => request()->routeIs('masjid.timetable')])>Timetable</a>
-                <a href="{{ route('masjid.ramadan', $masjid) }}" @class(['active' => request()->routeIs('masjid.ramadan')])>Ramadan</a>
-                <a href="{{ route('masjid.donate', $masjid) }}" @class(['active' => request()->routeIs('masjid.donate')])>Donate</a>
+                <a href="{{ route('masjid.show', $masjid) }}" @class(['active' => request()->routeIs('masjid.show')])>{{ __('Today') }}</a>
+                <a href="{{ route('masjid.timetable', $masjid) }}" @class(['active' => request()->routeIs('masjid.timetable')])>{{ __('Timetable') }}</a>
+                <a href="{{ route('masjid.ramadan', $masjid) }}" @class(['active' => request()->routeIs('masjid.ramadan')])>{{ __('Ramadan') }}</a>
+                <a href="{{ route('masjid.committee', $masjid) }}" @class(['active' => request()->routeIs('masjid.committee')])>{{ __('Committee') }}</a>
+                <a href="{{ route('masjid.donate', $masjid) }}" @class(['active' => request()->routeIs('masjid.donate')])>{{ __('Donate') }}</a>
             @endisset
             @auth
                 @if (auth()->user()->homeUrl() === route('admin.dashboard'))
-                    <a href="{{ route('admin.dashboard') }}">Admin panel</a>
+                    <a href="{{ route('admin.dashboard') }}">{{ __('Admin panel') }}</a>
                 @endif
-                <a href="{{ route('account') }}" @class(['active' => request()->routeIs('account*')])>My donations</a>
+                <a href="{{ route('account') }}" @class(['active' => request()->routeIs('account*')])>{{ __('My donations') }}</a>
                 <form method="POST" action="{{ route('logout') }}" class="inline">
                     @csrf
-                    <button type="submit">Sign out</button>
+                    <button type="submit">{{ __('Sign out') }}</button>
                 </form>
             @else
-                <a href="{{ route('login') }}" @class(['active' => request()->routeIs('login')])>Sign in</a>
+                <a href="{{ route('login') }}" @class(['active' => request()->routeIs('login')])>{{ __('Sign in') }}</a>
             @endauth
+        </nav>
+        <nav class="lang-switch" aria-label="{{ __('Language') }}">
+            @foreach (config('locales.supported') as $code => $name)
+                <a href="{{ request()->fullUrlWithQuery(['lang' => $code]) }}" lang="{{ $code }}" hreflang="{{ $code }}"
+                   @class(['active' => app()->getLocale() === $code]) @if (app()->getLocale() === $code) aria-current="true" @endif>{{ $name }}</a>
+            @endforeach
         </nav>
         @include('partials.clock', ['clockMasjid' => $masjid ?? null])
     </div>

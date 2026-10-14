@@ -21,9 +21,15 @@ final readonly class HijriDate
         return self::MONTHS[$this->month];
     }
 
+    /**
+     * e.g. "3 Jumada al-Ula 1448 AH", with the month name and "AH" in the current language.
+     */
     public function format(): string
     {
-        return "{$this->day} {$this->monthName()} {$this->year} AH";
+        // Outside a running app (plain unit tests) there is no translator: stay in English.
+        $t = fn (string $s) => function_exists('app') && app()->bound('translator') ? __($s) : $s;
+
+        return $this->day.' '.$t($this->monthName()).' '.$this->year.' '.$t('AH');
     }
 
     /**

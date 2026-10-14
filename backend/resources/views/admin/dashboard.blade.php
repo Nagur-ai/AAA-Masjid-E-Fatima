@@ -104,7 +104,7 @@
             <div class="card">
                 <div class="page-head" style="margin-bottom:8px">
                     <h2 style="margin:0">Today's prayers</h2>
-                    <a href="{{ route('admin.settings.edit') }}">Iqamah settings</a>
+                    <a class="btn small secondary" href="{{ route('admin.prayer-times.edit') }}">Edit times</a>
                 </div>
                 <div class="table-wrap">
                     <table>
@@ -113,7 +113,7 @@
                         @foreach (\App\Enums\Prayer::cases() as $p)
                             @php($isNext = $nextPrayer && $nextPrayer['prayer'] === $p->value)
                             <tr @class(['next-row' => $isNext])>
-                                <td>{{ $p->label() }} @if ($isNext)<br><span class="next-tag">Next</span><br><span class="next-in">{{ $nextPrayer['at']->isSameDay($today) ? '' : 'tomorrow, ' }}in {{ $today->diff($nextPrayer['at'])->format('%hh %Im') }}</span>@endif</td>
+                                <td>{{ $p->label() }} @if (in_array($p->value, $editedPrayers, true))<span class="badge pending">edited</span>@endif @if ($isNext)<br><span class="next-tag">Next</span><br><span class="next-in">{{ $nextPrayer['at']->isSameDay($today) ? '' : 'tomorrow, ' }}in {{ $today->diff($nextPrayer['at'])->format('%hh %Im') }}</span>@endif</td>
                                 <td>{{ $schedule->times[$p->value]?->format('H:i') }}</td>
                                 <td>{{ $schedule->iqamah[$p->value]?->format('H:i') ?? '—' }}</td>
                             </tr>
@@ -181,7 +181,7 @@
             @include('partials.ramadan-duas', ['duas' => $ramadan['duas']])
 
             <div style="margin-top:16px">
-                @include('partials.ramadan-table', ['days' => $ramadan['days'], 'todayStr' => $todayStr])
+                @include('partials.ramadan-table', ['days' => $ramadan['days'], 'todayStr' => $todayStr, 'title' => $currentMasjid->name])
             </div>
         </div>
     @endif

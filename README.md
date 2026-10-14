@@ -26,9 +26,9 @@ php artisan migrate --seed    # demo masjid "Masjid-e-Fatima", Hyderabad
 php artisan serve
 ```
 
-- Public site: http://localhost:8000/m/masjid-e-fatima
+- Public site: http://localhost:8000/msd/klr
 - Admin panel: http://localhost:8000/admin/login. The demo accounts are `admin@masjid.test` and `treasurer@masjid.test` (password `password`).
-- API: http://localhost:8000/api/v1/masjids/masjid-e-fatima/prayer-times
+- API: http://localhost:8000/api/v1/masjids/klr/prayer-times
 
 To create a real masjid instead of the demo, run `php artisan masjid:create`.
 

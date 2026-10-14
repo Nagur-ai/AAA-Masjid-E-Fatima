@@ -8,4 +8,4 @@ const String apiBaseUrl = String.fromEnvironment(
 );
 
 /// Masjid opened on first launch, before the user picks one.
-const String defaultMasjidSlug = String.fromEnvironment('MASJID_SLUG', defaultValue: 'masjid-e-fatima');
+const String defaultMasjidSlug = String.fromEnvironment('MASJID_SLUG', defaultValue: 'klr');

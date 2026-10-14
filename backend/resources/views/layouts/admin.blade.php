@@ -21,6 +21,7 @@
             @if($isAdmin)
                 <a href="{{ route('admin.ramadan.edit') }}" @class(['active' => request()->routeIs('admin.ramadan.*')])>Ramadan</a>
                 <a href="{{ route('admin.settings.edit') }}" @class(['active' => request()->routeIs('admin.settings.*')])>Settings</a>
+                <a href="{{ route('admin.committee.index') }}" @class(['active' => request()->routeIs('admin.committee.*')])>Committee</a>
                 <a href="{{ route('admin.users.index') }}" @class(['active' => request()->routeIs('admin.users.*')])>Staff</a>
             @endif
             <a href="{{ route('masjid.show', $currentMasjid) }}">Public site</a>

@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'name', 'slug', 'address', 'city', 'country', 'phone', 'email',
     'latitude', 'longitude', 'elevation', 'timezone',
     'calculation_method', 'asr_method', 'high_latitude_rule',
-    'hijri_adjustment', 'imsak_minutes_before_fajr', 'currency', 'bank_details', 'ramadan_image_path',
+    'hijri_adjustment', 'imsak_minutes_before_fajr', 'currency', 'bank_details', 'ramadan_image_path', 'banner_position',
 ])]
 class Masjid extends Model
 {
@@ -76,6 +76,21 @@ class Masjid extends Model
     public function ramadanDuas(): HasMany
     {
         return $this->hasMany(RamadanDua::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    public function committeeMembers(): HasMany
+    {
+        return $this->hasMany(CommitteeMember::class);
+    }
+
+    public function prayerTimeOverrides(): HasMany
+    {
+        return $this->hasMany(PrayerTimeOverride::class);
+    }
+
+    public function ramadanDayTimes(): HasMany
+    {
+        return $this->hasMany(RamadanDayTime::class);
     }
 
     public function funds(): HasMany
